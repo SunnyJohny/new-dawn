@@ -30,10 +30,6 @@ const Navbar = () => {
     logoutNewDawnUser,
   } = useMyContext();
 
-  const darkGreen = "#064e3b";
-  const deeperGreen = "#022c22";
-  const gold = "#c7922b";
-
   useEffect(() => {
     const handleScroll = () => {
       setIsSticky(window.scrollY > 40);
@@ -64,6 +60,11 @@ const Navbar = () => {
     setActiveMobileDropdown(null);
   };
 
+  const closeMobileMenu = () => {
+    setIsMenuOpen(false);
+    setActiveMobileDropdown(null);
+  };
+
   const toggleMobileDropdown = (name) => {
     setActiveMobileDropdown((prev) => (prev === name ? null : name));
   };
@@ -75,9 +76,7 @@ const Navbar = () => {
     setActiveDropdown((prev) => (prev === name ? null : name));
   };
 
-  const handleScrollAdjust = (e, path) => {
-    e.preventDefault();
-
+  const scrollToSection = (path) => {
     const target = document.getElementById(path);
 
     if (target) {
@@ -88,23 +87,38 @@ const Navbar = () => {
         top,
         behavior: "smooth",
       });
-
-      setIsMenuOpen(false);
-      setActiveDropdown(null);
-      setActiveMobileDropdown(null);
     }
+  };
+
+  const handleScrollAdjust = (e, path) => {
+    e.preventDefault();
+
+    setActiveDropdown(null);
+    setActiveMobileDropdown(null);
+
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+
+      setTimeout(() => {
+        scrollToSection(path);
+      }, 320);
+
+      return;
+    }
+
+    scrollToSection(path);
   };
 
   const openSignIn = () => {
     setShowSignInModal(true);
     setShowSignUpModal(false);
-    setIsMenuOpen(false);
+    closeMobileMenu();
   };
 
   const openSignUp = () => {
     setShowSignUpModal(true);
     setShowSignInModal(false);
-    setIsMenuOpen(false);
+    closeMobileMenu();
   };
 
   const closeAuthModals = () => {
@@ -158,7 +172,7 @@ const Navbar = () => {
     try {
       await logoutNewDawnUser();
       toast.info("Logged out successfully");
-      setIsMenuOpen(false);
+      closeMobileMenu();
     } catch (error) {
       toast.error(error.message || "Logout failed");
     }
