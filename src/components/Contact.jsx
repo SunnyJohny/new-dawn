@@ -34,15 +34,14 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-[#f8fafc]">
+    <section id="contact" className="py-20 bg-[#E9FFF3]">
       <div className="container mx-auto px-4 md:px-10">
-        {/* Header */}
         <div className="mb-12 text-center">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#c7922b] mb-3">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-3">
             Contact & Enquiries
           </p>
 
-          <h2 className="text-4xl md:text-5xl font-extrabold text-[#064e3b] mb-5">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#087A3D] mb-5">
             Get in Touch
           </h2>
 
@@ -52,17 +51,17 @@ const Contact = () => {
             The New Dawn communication team.
           </p>
 
-          <div className="w-24 h-1 bg-[#c7922b] mx-auto mt-6 rounded-full"></div>
+          <div className="w-24 h-1 bg-[#F2B705] mx-auto mt-6 rounded-full"></div>
         </div>
 
         <div className="flex flex-wrap lg:flex-nowrap gap-8 items-stretch">
-          {/* Form Section */}
+          {/* FORM */}
           <form
             ref={form}
             onSubmit={sendEmail}
-            className="w-full lg:w-1/2 p-6 md:p-8 border border-emerald-900/10 bg-white shadow-xl rounded-2xl"
+            className="w-full lg:w-1/2 p-6 md:p-8 border border-[#C9F5DC] bg-white shadow-xl rounded-2xl"
           >
-            <h3 className="text-2xl font-extrabold text-[#064e3b] mb-6">
+            <h3 className="text-2xl font-extrabold text-[#087A3D] mb-6">
               Send a Message
             </h3>
 
@@ -72,8 +71,7 @@ const Contact = () => {
             <input
               type="text"
               name="user_name"
-              className="block w-full text-base p-3 border border-gray-300 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#c7922b] focus:border-[#c7922b]"
-              placeholder="Enter your full name"
+              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:ring-2 focus:ring-[#12A85C]"
               required
             />
 
@@ -83,27 +81,9 @@ const Contact = () => {
             <input
               type="email"
               name="user_email"
-              className="block w-full text-base p-3 border border-gray-300 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#c7922b] focus:border-[#c7922b]"
-              placeholder="Enter your active email"
+              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:ring-2 focus:ring-[#12A85C]"
               required
             />
-
-            <label className="block text-sm font-bold mb-2 text-gray-700">
-              Enquiry Type
-            </label>
-            <select
-              name="enquiry_type"
-              className="block w-full text-base p-3 border border-gray-300 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#c7922b] focus:border-[#c7922b] bg-white"
-              required
-            >
-              <option value="">Select enquiry type</option>
-              <option value="Media Enquiry">Media Enquiry</option>
-              <option value="Partnership">Partnership</option>
-              <option value="Documentary Access">Documentary Access</option>
-              <option value="Archive Submission">Archive Submission</option>
-              <option value="Public Engagement">Public Engagement</option>
-              <option value="General Enquiry">General Enquiry</option>
-            </select>
 
             <label className="block text-sm font-bold mb-2 text-gray-700">
               Subject
@@ -111,8 +91,7 @@ const Contact = () => {
             <input
               type="text"
               name="subject"
-              className="block w-full text-base p-3 border border-gray-300 rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#c7922b] focus:border-[#c7922b]"
-              placeholder="Message subject"
+              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:ring-2 focus:ring-[#12A85C]"
               required
             />
 
@@ -122,128 +101,85 @@ const Contact = () => {
             <textarea
               name="message"
               rows="6"
-              className="block w-full text-base p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-[#c7922b] focus:border-[#c7922b]"
-              placeholder="Write your message here..."
+              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-6 focus:ring-2 focus:ring-[#12A85C]"
               required
             ></textarea>
 
-            <button
-              type="submit"
-              className="w-full bg-[#064e3b] text-white text-lg font-bold py-3 rounded-lg hover:bg-[#c7922b] transition"
-            >
+            <button className="w-full bg-[#087A3D] text-white py-3 rounded-lg font-bold hover:bg-[#12A85C] transition">
               Send Message
             </button>
           </form>
 
-          {/* Contact Details Section */}
-          <div className="w-full lg:w-1/2 bg-[#064e3b] text-white p-8 md:p-10 rounded-2xl shadow-xl">
+          {/* CONTACT INFO */}
+          <div className="w-full lg:w-1/2 bg-[#087A3D] text-white p-8 rounded-2xl shadow-xl">
             <h3 className="text-3xl font-extrabold mb-4">
               Contact Information
             </h3>
 
-            <p className="mb-8 text-white/80 leading-relaxed">
-              The New Dawn is a strategic multimedia programme powered by
-              Shevet-city Communications in conjunction with the Niger State
-              Government. Connect with us for official communication, media
-              collaboration, and public engagement support.
-            </p>
-
             <div className="space-y-6">
               <div className="flex items-start">
-                <FaPhoneAlt className="text-[#c7922b] text-2xl mr-4 mt-1" />
+                <FaPhoneAlt className="text-[#F2B705] mr-4 mt-1" />
                 <div>
                   <p className="font-bold">Phone</p>
-                  <p className="text-white/80">+2348038652949</p>
+                  <p className="text-white/80">+234 906 906 0610</p>
                 </div>
               </div>
 
               <div className="flex items-start">
-                <FaEnvelope className="text-[#c7922b] text-2xl mr-4 mt-1" />
+                <FaEnvelope className="text-[#F2B705] mr-4 mt-1" />
                 <div>
                   <p className="font-bold">Email</p>
-                  <p className="text-white/80">info@shevet-citymedia.com</p>
+                  <p className="text-white/80">
+                    info@nigerstate-newdawn.com
+                  </p>
                 </div>
               </div>
 
               <div className="flex items-start">
-                <GoLocation className="text-[#c7922b] text-2xl mr-4 mt-1" />
-                <div>
-                  <p className="font-bold">Location</p>
-                  <p className="text-white/80">Niger State, Nigeria</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <MdOutlinePublic className="text-[#c7922b] text-2xl mr-4 mt-1" />
+                <MdOutlinePublic className="text-[#F2B705] mr-4 mt-1" />
                 <div>
                   <p className="font-bold">Website</p>
                   <a
-                    href="https://shevet-citymedia.com"
+                    href="https://www.nigerstate-newdawn.com"
                     target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/80 hover:text-[#c7922b] transition"
+                    rel="noreferrer"
+                    className="text-white/80 hover:text-[#F2B705]"
                   >
-                    shevet-citymedia.com
+                    www.nigerstate-newdawn.com
                   </a>
                 </div>
               </div>
 
               <div className="flex items-start">
-                <FaWhatsapp className="text-[#c7922b] text-2xl mr-4 mt-1" />
+                <FaWhatsapp className="text-[#F2B705] mr-4 mt-1" />
                 <div>
                   <p className="font-bold">WhatsApp</p>
                   <a
-                    href="https://wa.me/2348038652949?text=Hello%20The%20New%20Dawn%20team%2C%20I%20would%20like%20to%20make%20an%20inquiry."
+                    href="https://wa.me/2349069060610"
                     target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/80 hover:text-[#c7922b] transition"
+                    rel="noreferrer"
+                    className="text-white/80 hover:text-[#F2B705]"
                   >
-                    Chat on WhatsApp
+                    Chat Now
                   </a>
                 </div>
               </div>
             </div>
 
-            {/* Social Links */}
-            <div className="mt-10 pt-8 border-t border-white/20">
-              <p className="font-bold mb-4">Follow The New Dawn</p>
+            <div className="mt-10 pt-6 border-t border-white/20">
+              <p className="font-bold mb-4">Follow Us</p>
 
-              <div className="flex items-center gap-4">
-                <a
-                  href="#"
-                  aria-label="Facebook"
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#c7922b] transition"
-                >
+              <div className="flex gap-4">
+                <div className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#087A3D] transition">
                   <FaFacebookF />
-                </a>
-
-                <a
-                  href="#"
-                  aria-label="Instagram"
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#c7922b] transition"
-                >
+                </div>
+                <div className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#087A3D] transition">
                   <FaInstagram />
-                </a>
-
-                <a
-                  href="#"
-                  aria-label="YouTube"
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#c7922b] transition"
-                >
+                </div>
+                <div className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#087A3D] transition">
                   <FaYoutube />
-                </a>
+                </div>
               </div>
-            </div>
-
-            {/* Note */}
-            <div className="mt-10 bg-white/10 rounded-xl p-5 border-l-4 border-[#c7922b]">
-              <h4 className="font-extrabold mb-2">Public Submissions</h4>
-              <p className="text-white/80 text-sm leading-relaxed">
-                Members of the public, media partners, and stakeholders may
-                submit records, videos, reactions, and verified materials for
-                possible inclusion in the archives and public engagement
-                platform.
-              </p>
             </div>
           </div>
         </div>

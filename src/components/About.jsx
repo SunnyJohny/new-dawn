@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   FaBookOpen,
@@ -48,6 +48,54 @@ const pillarsData = [
   },
 ];
 
+const senatorialZones = [
+  {
+    zone: "Niger East Senatorial Zone",
+    alias: "Zone B",
+    lgas: [
+      "Bosso",
+      "Chanchaga",
+      "Gurara",
+      "Munya",
+      "Paikoro",
+      "Rafi",
+      "Shiroro",
+      "Suleja",
+      "Tafa",
+    ],
+  },
+  {
+    zone: "Niger North Senatorial Zone",
+    alias: "Zone C",
+    lgas: [
+      "Agwara",
+      "Borgu",
+      "Kontagora",
+      "Magama",
+      "Mariga",
+      "Mashegu",
+      "Rijau",
+      "Wushishi",
+    ],
+  },
+  {
+    zone: "Niger South Senatorial Zone",
+    alias: "Zone A",
+    lgas: [
+      "Agaie",
+      "Bida",
+      "Edati",
+      "Gbako",
+      "Katcha",
+      "Lapai",
+      "Lavun",
+      "Mokwa",
+    ],
+  },
+];
+
+const allLgas = senatorialZones.flatMap((zone) => zone.lgas);
+
 const iconAnimations = [
   {
     animate: {
@@ -89,18 +137,23 @@ const iconAnimations = [
 ];
 
 const AboutUs = () => {
+  const [openInfoCard, setOpenInfoCard] = useState(null);
+
+  const toggleInfoCard = (card) => {
+    setOpenInfoCard((prev) => (prev === card ? null : card));
+  };
+
   return (
     <section
       id="about"
-      className="min-h-screen bg-[#f8fafc] text-gray-800 py-20 px-5 md:px-20"
+      className="min-h-screen bg-[#E9FFF3] text-gray-800 py-20 px-5 md:px-20"
     >
-      {/* Title Section */}
       <div className="mb-14 text-center">
-        <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#c7922b] mb-3">
+        <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-3">
           About The Initiative
         </p>
 
-        <h2 className="text-4xl md:text-5xl font-extrabold text-[#064e3b] mb-5 tracking-tight">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-[#087A3D] mb-5 tracking-tight">
           The New Dawn
         </h2>
 
@@ -109,45 +162,42 @@ const AboutUs = () => {
           enlightenment dedicated to the good people of Niger State.
         </p>
 
-        <div className="w-24 h-1 bg-[#c7922b] mx-auto mt-6 rounded-full"></div>
+        <div className="w-24 h-1 bg-[#F2B705] mx-auto mt-6 rounded-full"></div>
       </div>
 
-      {/* Main Info Section */}
       <div className="grid lg:grid-cols-2 gap-10 items-center mb-20">
-        {/* Image */}
         <div className="relative">
           <img
             src="/images/New-DawnLogo.png"
             alt="The New Dawn"
-            className="w-full max-h-[520px] rounded-2xl shadow-xl object-contain bg-[#064e3b] p-8"
+            className="w-full max-h-[520px] rounded-2xl shadow-xl object-contain bg-[#087A3D] p-8"
           />
 
-          <div className="absolute -bottom-6 left-6 right-6 bg-white shadow-xl rounded-xl p-5 border-l-4 border-[#c7922b]">
+          <div className="absolute -bottom-6 left-6 right-6 bg-white shadow-xl rounded-xl p-5 border-l-4 border-[#F2B705]">
             <p className="text-sm uppercase tracking-wide text-gray-500 font-semibold">
               Slogan
             </p>
-            <h3 className="text-xl md:text-2xl font-extrabold text-[#064e3b]">
+            <h3 className="text-xl md:text-2xl font-extrabold text-[#087A3D]">
               Leadership in Action, A State in Motion.
             </h3>
           </div>
         </div>
 
-        {/* Description */}
         <div className="pt-8 lg:pt-0">
-          <h3 className="text-3xl font-extrabold text-[#064e3b] mb-5">
+          <h3 className="text-3xl font-extrabold text-[#087A3D] mb-5">
             Capturing Governance in Motion
           </h3>
 
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            <strong className="text-[#064e3b]">The New Dawn</strong> is an
+            <strong className="text-[#087A3D]">The New Dawn</strong> is an
             initiative of{" "}
-            <strong className="text-[#c7922b]">
+            <strong className="text-[#F2B705]">
               Shevet-city Communications
             </strong>{" "}
             in conjunction with the Niger State Government, created to celebrate
             the development agenda and progress of Niger State under the
             leadership of{" "}
-            <strong className="text-[#064e3b]">
+            <strong className="text-[#087A3D]">
               His Excellency, Farmer Governor Mohammed Umaru Bago.
             </strong>
           </p>
@@ -167,31 +217,130 @@ const AboutUs = () => {
           </p>
 
           <div className="grid sm:grid-cols-3 gap-4">
-            <div className="bg-[#064e3b] text-white rounded-xl p-5 text-center">
+            <button
+              type="button"
+              onClick={() => toggleInfoCard("lgas")}
+              className="bg-[#087A3D] text-white rounded-xl p-5 text-center hover:scale-[1.02] transition shadow-md"
+            >
               <h4 className="text-2xl font-extrabold">25</h4>
               <p className="text-sm text-white/80">LGAs</p>
-            </div>
+              <p className="text-xs text-[#F2B705] font-bold mt-2">
+                Click to view
+              </p>
+            </button>
 
-            <div className="bg-[#c7922b] text-white rounded-xl p-5 text-center">
+            <button
+              type="button"
+              onClick={() => toggleInfoCard("zones")}
+              className="bg-[#F2B705] text-[#087A3D] rounded-xl p-5 text-center hover:scale-[1.02] transition shadow-md"
+            >
               <h4 className="text-2xl font-extrabold">3</h4>
-              <p className="text-sm text-white/80">Senatorial Zones</p>
-            </div>
+              <p className="text-sm text-[#087A3D]/80">Senatorial Zones</p>
+              <p className="text-xs text-[#087A3D] font-bold mt-2">
+                Click to view
+              </p>
+            </button>
 
-            <div className="bg-[#022c22] text-white rounded-xl p-5 text-center">
+            <button
+              type="button"
+              onClick={() => toggleInfoCard("narrative")}
+              className="bg-[#12A85C] text-white rounded-xl p-5 text-center hover:scale-[1.02] transition shadow-md"
+            >
               <h4 className="text-2xl font-extrabold">1</h4>
               <p className="text-sm text-white/80">Shared Narrative</p>
-            </div>
+              <p className="text-xs text-[#F2B705] font-bold mt-2">
+                Click to view
+              </p>
+            </button>
           </div>
+
+          {openInfoCard && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-5 bg-white border border-[#C9F5DC] rounded-2xl shadow-lg p-5"
+            >
+              {openInfoCard === "lgas" && (
+                <div>
+                  <h4 className="text-xl font-extrabold text-[#087A3D] mb-3">
+                    25 Local Government Areas in Niger State
+                  </h4>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {allLgas.map((lga, index) => (
+                      <span
+                        key={lga}
+                        className="bg-[#E9FFF3] border border-[#C9F5DC] text-[#087A3D] rounded-lg px-3 py-2 text-sm font-semibold"
+                      >
+                        {index + 1}. {lga}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {openInfoCard === "zones" && (
+                <div>
+                  <h4 className="text-xl font-extrabold text-[#087A3D] mb-4">
+                    Senatorial Zones and LGAs
+                  </h4>
+
+                  <div className="space-y-4">
+                    {senatorialZones.map((zone) => (
+                      <div
+                        key={zone.zone}
+                        className="bg-[#E9FFF3] border border-[#C9F5DC] rounded-xl p-4"
+                      >
+                        <div className="flex items-center justify-between gap-3 mb-3">
+                          <h5 className="font-extrabold text-[#087A3D]">
+                            {zone.zone}
+                          </h5>
+                          <span className="text-xs font-bold bg-[#F2B705] text-[#087A3D] px-3 py-1 rounded-full">
+                            {zone.alias}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          {zone.lgas.map((lga) => (
+                            <span
+                              key={lga}
+                              className="bg-white text-slate-700 border border-[#C9F5DC] rounded-full px-3 py-1 text-xs font-semibold"
+                            >
+                              {lga}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {openInfoCard === "narrative" && (
+                <div>
+                  <h4 className="text-xl font-extrabold text-[#087A3D] mb-3">
+                    One Shared Narrative
+                  </h4>
+
+                  <p className="text-gray-700 leading-relaxed">
+                    The New Dawn brings the 25 LGAs and 3 senatorial zones into
+                    one coordinated story of leadership, progress, public
+                    engagement, documentation, and accountability across Niger
+                    State.
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          )}
         </div>
       </div>
 
-      {/* Programme Pillars */}
       <div id="programme" className="text-center mb-20">
-        <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#c7922b] mb-3">
+        <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-3">
           Programme Framework
         </p>
 
-        <h2 className="text-3xl md:text-4xl font-extrabold text-[#064e3b] mb-6">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-[#087A3D] mb-6">
           Human-Centred Storytelling & Public Enlightenment
         </h2>
 
@@ -208,18 +357,18 @@ const AboutUs = () => {
             return (
               <div
                 key={index}
-                className="bg-white shadow-lg rounded-2xl p-7 border border-emerald-900/10 hover:shadow-2xl hover:border-[#c7922b]/50 transition"
+                className="bg-white shadow-lg rounded-2xl p-7 border border-[#C9F5DC] hover:shadow-2xl hover:border-[#F2B705]/70 transition"
               >
                 <motion.div
                   className="flex justify-center mb-5"
                   animate={iconAnimations[index % iconAnimations.length].animate}
                 >
-                  <div className="w-16 h-16 rounded-full bg-[#064e3b] flex items-center justify-center">
-                    <IconComponent size={30} className="text-[#c7922b]" />
+                  <div className="w-16 h-16 rounded-full bg-[#087A3D] flex items-center justify-center">
+                    <IconComponent size={30} className="text-[#F2B705]" />
                   </div>
                 </motion.div>
 
-                <h3 className="text-xl font-extrabold text-[#064e3b] mb-3">
+                <h3 className="text-xl font-extrabold text-[#087A3D] mb-3">
                   {pillar.title}
                 </h3>
 
@@ -232,16 +381,15 @@ const AboutUs = () => {
         </div>
       </div>
 
-      {/* Vision & Mission Section */}
-      <div className="bg-white rounded-3xl p-6 md:p-12 mb-20 shadow-md border border-emerald-900/10">
-        <h3 className="text-3xl md:text-4xl font-extrabold text-[#064e3b] text-center uppercase tracking-wide mb-10">
+      <div className="bg-white rounded-3xl p-6 md:p-12 mb-20 shadow-md border border-[#C9F5DC]">
+        <h3 className="text-3xl md:text-4xl font-extrabold text-[#087A3D] text-center uppercase tracking-wide mb-10">
           Vision & Mission
         </h3>
 
         <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <h4 className="text-2xl font-bold text-[#064e3b] mb-4">Vision</h4>
-            <p className="text-lg text-gray-700 bg-[#f8fafc] p-6 border-l-4 border-[#c7922b] rounded-xl shadow-md leading-relaxed">
+            <h4 className="text-2xl font-bold text-[#087A3D] mb-4">Vision</h4>
+            <p className="text-lg text-gray-700 bg-[#E9FFF3] p-6 border-l-4 border-[#F2B705] rounded-xl shadow-md leading-relaxed">
               To position The New Dawn as a structured leadership platform that
               captures governance in motion, preserves verified progress, and
               communicates Niger State’s development journey through credible,
@@ -250,8 +398,8 @@ const AboutUs = () => {
           </div>
 
           <div>
-            <h4 className="text-2xl font-bold text-[#064e3b] mb-4">Mission</h4>
-            <p className="text-lg text-gray-700 bg-[#f8fafc] p-6 border-l-4 border-[#064e3b] rounded-xl shadow-md leading-relaxed">
+            <h4 className="text-2xl font-bold text-[#087A3D] mb-4">Mission</h4>
+            <p className="text-lg text-gray-700 bg-[#E9FFF3] p-6 border-l-4 border-[#087A3D] rounded-xl shadow-md leading-relaxed">
               To document, package, and disseminate the administration’s
               development agenda through research, documentary production,
               public engagement, digital platforms, archives, and strategic
@@ -261,10 +409,8 @@ const AboutUs = () => {
         </div>
       </div>
 
-    
-{/* Outcomes Section */}
-      <div className="bg-[#064e3b] text-white rounded-3xl p-8 md:p-14 shadow-xl">
-        <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#c7922b] mb-3 text-center">
+      <div className="bg-[#087A3D] text-white rounded-3xl p-8 md:p-14 shadow-xl">
+        <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-3 text-center">
           Expected Outcome
         </p>
 

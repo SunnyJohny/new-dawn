@@ -5,6 +5,8 @@ import {
   onSnapshot,
   addDoc,
   setDoc,
+  updateDoc,
+  deleteDoc,
   serverTimestamp,
   query,
   orderBy,
@@ -55,6 +57,9 @@ export const MyContextProvider = ({ children }) => {
 
   const subCollectionRef = (name) =>
     collection(db, "newDawn", NEW_DAWN_ID, name);
+
+  const subDocumentRef = (collectionName, docId) =>
+    doc(db, "newDawn", NEW_DAWN_ID, collectionName, docId);
 
   useEffect(() => {
     const createMainNewDawnDocument = async () => {
@@ -124,6 +129,7 @@ export const MyContextProvider = ({ children }) => {
         (snapshot) => {
           const data = snapshot.docs.map((docItem) => ({
             id: docItem.id,
+            firestorePath: docItem.ref.path,
             ...docItem.data(),
           }));
 
@@ -140,10 +146,13 @@ export const MyContextProvider = ({ children }) => {
     };
   }, []);
 
-  // ✅ FIXED: safer published filter
   const publishedDocumentaries = useMemo(() => {
     return documentaries.filter((item) => item.status !== "draft");
   }, [documentaries]);
+
+  const publishedArchives = useMemo(() => {
+    return archives.filter((item) => item.status !== "draft");
+  }, [archives]);
 
   const documentaryByCategory = useMemo(() => {
     return {
@@ -164,6 +173,21 @@ export const MyContextProvider = ({ children }) => {
       ),
     };
   }, [publishedDocumentaries]);
+
+  const archiveByCategory = useMemo(() => {
+    return {
+      records: publishedArchives.filter(
+        (item) => (item.category || "records") === "records"
+      ),
+      videos: publishedArchives.filter((item) => item.category === "videos"),
+      leadershipHub: publishedArchives.filter(
+        (item) => item.category === "leadership-hub"
+      ),
+      platforms: publishedArchives.filter(
+        (item) => item.category === "platforms"
+      ),
+    };
+  }, [publishedArchives]);
 
   const signedInUserData = useMemo(() => {
     if (!currentUser) return null;
@@ -218,7 +242,6 @@ export const MyContextProvider = ({ children }) => {
     await signOut(auth);
   };
 
-  // ✅ FIXED: addDocumentary improved
   const addDocumentary = async (data) => {
     if (!currentUser) {
       throw new Error("You must be signed in to add documentary content.");
@@ -242,11 +265,127 @@ export const MyContextProvider = ({ children }) => {
       createdBy: currentUser?.uid || null,
       createdByEmail: currentUser?.email || "",
       createdByName:
-        currentUser?.displayName ||
-        currentUser?.email?.split("@")[0] ||
-        "",
+        currentUser?.displayName || currentUser?.email?.split("@")[0] || "",
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
+  };
+
+  const updateDocumentary = async (docId, data) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to update documentary content.");
+    }
+
+    if (!docId) {
+      throw new Error("Missing documentary document ID.");
+    }
+
+    await updateDoc(subDocumentRef("documentary", docId), {
+      title: data.title || "",
+      description: data.description || "",
+      category: data.category || "watch-documentary",
+      mediaType: data.mediaType || "video",
+      mediaUrl: data.mediaUrl || "",
+      thumbnailUrl: data.thumbnailUrl || "",
+      source: data.source || "Cloudinary",
+      status: data.status || "published",
+
+      fileName: data.fileName || "",
+      fileType: data.fileType || "",
+      fileSize: data.fileSize || 0,
+      storageProvider: data.storageProvider || "cloudinary",
+
+      updatedBy: currentUser?.uid || null,
+      updatedByEmail: currentUser?.email || "",
+      updatedByName:
+        currentUser?.displayName || currentUser?.email?.split("@")[0] || "",
+      updatedAt: serverTimestamp(),
+    });
+  };
+
+  const deleteDocumentary = async (docId) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to delete documentary content.");
+    }
+
+    if (!docId) {
+      throw new Error("Missing documentary document ID.");
+    }
+
+    await deleteDoc(subDocumentRef("documentary", docId));
+  };
+
+  const addArchive = async (data) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to add archive content.");
+    }
+
+    return await addDoc(subCollectionRef("archives"), {
+      title: data.title || "",
+      description: data.description || "",
+      category: data.category || "records",
+      mediaType: data.mediaType || "video",
+      mediaUrl: data.mediaUrl || "",
+      thumbnailUrl: data.thumbnailUrl || "",
+      source: data.source || "Cloudinary",
+      status: data.status || "published",
+
+      fileName: data.fileName || "",
+      fileType: data.fileType || "",
+      fileSize: data.fileSize || 0,
+      storageProvider: data.storageProvider || "cloudinary",
+
+      createdBy: currentUser?.uid || null,
+      createdByEmail: currentUser?.email || "",
+      createdByName:
+        currentUser?.displayName || currentUser?.email?.split("@")[0] || "",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  };
+
+  const updateArchive = async (docId, data) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to update archive content.");
+    }
+
+    if (!docId) {
+      throw new Error("Missing archive document ID.");
+    }
+
+    await updateDoc(subDocumentRef("archives", docId), {
+      title: data.title || "",
+      description: data.description || "",
+      category: data.category || "records",
+      mediaType: data.mediaType || "video",
+      mediaUrl: data.mediaUrl || "",
+      thumbnailUrl: data.thumbnailUrl || "",
+      source: data.source || "Cloudinary",
+      status: data.status || "published",
+
+      fileName: data.fileName || "",
+      fileType: data.fileType || "",
+      fileSize: data.fileSize || 0,
+      storageProvider: data.storageProvider || "cloudinary",
+
+      updatedBy: currentUser?.uid || null,
+      updatedByEmail: currentUser?.email || "",
+      updatedByName:
+        currentUser?.displayName || currentUser?.email?.split("@")[0] || "",
+      updatedAt: serverTimestamp(),
+    });
+  };
+
+  const deleteArchive = async (docId) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to delete archive content.");
+    }
+
+    if (!docId) {
+      throw new Error("Missing archive document ID.");
+    }
+
+    await deleteDoc(subDocumentRef("archives", docId));
   };
 
   const searchByKeyword = (items, keyword) => {
@@ -287,15 +426,33 @@ export const MyContextProvider = ({ children }) => {
         newDawnProfile,
 
         users,
+
         documentaries,
         publishedDocumentaries,
         documentaryByCategory,
+
+        archives,
+        publishedArchives,
+        archiveByCategory,
+
+        videos,
+        photos,
+        records,
+        platforms,
+        messages,
+        comments,
 
         signUpNewDawnUser,
         signInNewDawnUser,
         logoutNewDawnUser,
 
         addDocumentary,
+        updateDocumentary,
+        deleteDocumentary,
+
+        addArchive,
+        updateArchive,
+        deleteArchive,
 
         searchByKeyword,
         capitalizeWords,
@@ -305,3 +462,5 @@ export const MyContextProvider = ({ children }) => {
     </MyContext.Provider>
   );
 };
+
+export default MyContextProvider;

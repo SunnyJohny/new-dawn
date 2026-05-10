@@ -3,7 +3,7 @@ import {
   FaPlus,
   FaPlayCircle,
   FaImage,
-  FaBroadcastTower,
+  FaArchive,
   FaEdit,
   FaTrash,
   FaTimes,
@@ -12,18 +12,17 @@ import {
 import { toast } from "react-toastify";
 import { useMyContext } from "../Context/MyContext";
 
-const categoryTabs = [
-  { label: "Watch Documentary", value: "watch-documentary" },
-  { label: "Trailers & Clips", value: "trailers" },
-  { label: "Behind the Scenes", value: "behind-scenes" },
-  { label: "Photo Highlights", value: "photo-highlights" },
-  { label: "Releases & Broadcast", value: "broadcast" },
+const archiveTabs = [
+  { label: "Records", value: "records" },
+  { label: "Videos", value: "videos" },
+  { label: "Leadership Hub", value: "leadership-hub" },
+  { label: "Platforms", value: "platforms" },
 ];
 
 const initialFormData = {
   title: "",
   description: "",
-  category: "watch-documentary",
+  category: "records",
   mediaType: "video",
   mediaUrl: "",
   thumbnailUrl: "",
@@ -31,17 +30,17 @@ const initialFormData = {
   status: "published",
 };
 
-const Documentary = () => {
+const Archives = () => {
   const {
     currentUser,
-    documentaries = [],
-    publishedDocumentaries = [],
-    addDocumentary,
-    updateDocumentary,
-    deleteDocumentary,
+    archives = [],
+    publishedArchives = [],
+    addArchive,
+    updateArchive,
+    deleteArchive,
   } = useMyContext();
 
-  const [activeCategory, setActiveCategory] = useState("watch-documentary");
+  const [activeCategory, setActiveCategory] = useState("records");
   const [showAddForm, setShowAddForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -54,14 +53,14 @@ const Documentary = () => {
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [formData, setFormData] = useState(initialFormData);
 
-  const signedInItems =
-    documentaries.length > 0 ? documentaries : publishedDocumentaries;
-
-  const visibleItems = currentUser ? signedInItems : publishedDocumentaries;
+  const signedInItems = archives.length > 0 ? archives : publishedArchives;
+  const visibleItems = currentUser ? signedInItems : publishedArchives;
 
   const filteredItems = visibleItems.filter(
-    (item) => (item.category || "watch-documentary") === activeCategory
+    (item) => (item.category || "records") === activeCategory
   );
+
+  const isTextArchive = formData.mediaType === "text";
 
   const formatAddedTime = (createdAt) => {
     if (!createdAt) return "Just now";
@@ -85,11 +84,8 @@ const Documentary = () => {
   };
 
   const getCategoryTitle = (category) => {
-    return categoryTabs.find((tab) => tab.value === category)?.label || category;
+    return archiveTabs.find((tab) => tab.value === category)?.label || category;
   };
-
-  const isTextBroadcast =
-    formData.category === "broadcast" && formData.mediaType === "text";
 
   const resetForm = () => {
     setFormData(initialFormData);
@@ -108,19 +104,10 @@ const Documentary = () => {
     const { name, value } = e.target;
 
     setFormData((prev) => {
-      if (name === "category" && value === "broadcast") {
+      if (name === "mediaType" && value === "text") {
         return {
           ...prev,
-          category: value,
-          mediaType: prev.mediaType || "text",
-        };
-      }
-
-      if (name === "category" && prev.mediaType === "text") {
-        return {
-          ...prev,
-          category: value,
-          mediaType: "video",
+          mediaType: value,
         };
       }
 
@@ -311,7 +298,7 @@ const Documentary = () => {
     setFormData({
       title: item.title || "",
       description: item.description || "",
-      category: item.category || "watch-documentary",
+      category: item.category || "records",
       mediaType: item.mediaType || "video",
       mediaUrl: item.mediaUrl || "",
       thumbnailUrl: item.thumbnailUrl || "",
@@ -320,19 +307,19 @@ const Documentary = () => {
     });
 
     window.scrollTo({
-      top: document.getElementById("documentary")?.offsetTop || 0,
+      top: document.getElementById("archives")?.offsetTop || 0,
       behavior: "smooth",
     });
   };
 
   const handleDelete = async (item) => {
     if (!currentUser) {
-      toast.error("Please sign in before deleting content.");
+      toast.error("Please sign in before deleting archive content.");
       return;
     }
 
-    if (!deleteDocumentary) {
-      toast.error("deleteDocumentary is not available in your context yet.");
+    if (!deleteArchive) {
+      toast.error("deleteArchive is not available in your context yet.");
       return;
     }
 
@@ -344,11 +331,11 @@ const Documentary = () => {
 
     try {
       setDeletingId(item.id);
-      await deleteDocumentary(item.id);
-      toast.success("Content deleted successfully.");
+      await deleteArchive(item.id);
+      toast.success("Archive content deleted successfully.");
     } catch (error) {
-      console.error("Error deleting documentary content:", error);
-      toast.error(error.message || "Failed to delete content.");
+      console.error("Error deleting archive content:", error);
+      toast.error(error.message || "Failed to delete archive content.");
     } finally {
       setDeletingId(null);
     }
@@ -358,7 +345,7 @@ const Documentary = () => {
     e.preventDefault();
 
     if (!currentUser) {
-      toast.error("Please sign in before managing documentary content.");
+      toast.error("Please sign in before managing archive content.");
       return;
     }
 
@@ -367,12 +354,12 @@ const Documentary = () => {
       return;
     }
 
-    if (isTextBroadcast && !formData.description.trim()) {
-      toast.error("Please write the broadcast text.");
+    if (isTextArchive && !formData.description.trim()) {
+      toast.error("Please write the archive text.");
       return;
     }
 
-    if (!editingItem && !mediaFile && !isTextBroadcast) {
+    if (!editingItem && !mediaFile && !isTextArchive) {
       toast.error("Please select a file from your device.");
       return;
     }
@@ -384,52 +371,57 @@ const Documentary = () => {
       let mediaUrl = formData.mediaUrl;
       let thumbnailUrl = formData.thumbnailUrl;
 
-      if (mediaFile && !isTextBroadcast) {
-        mediaUrl = await uploadToCloudinary(mediaFile, "documentary");
+      if (mediaFile && !isTextArchive) {
+        mediaUrl = await uploadToCloudinary(mediaFile, "archives");
       }
 
-      if (thumbnailFile && formData.mediaType !== "photo" && !isTextBroadcast) {
-        thumbnailUrl = await uploadToCloudinary(thumbnailFile, "thumbnails");
+      if (thumbnailFile && formData.mediaType !== "photo" && !isTextArchive) {
+        thumbnailUrl = await uploadToCloudinary(thumbnailFile, "archive-thumbnails");
       }
 
       const payload = {
         ...formData,
-        mediaUrl: isTextBroadcast ? "" : mediaUrl,
-        thumbnailUrl: isTextBroadcast ? "" : thumbnailUrl,
-        fileName: isTextBroadcast
+        mediaUrl: isTextArchive ? "" : mediaUrl,
+        thumbnailUrl: isTextArchive ? "" : thumbnailUrl,
+        fileName: isTextArchive
           ? ""
           : mediaFile?.name || editingItem?.fileName || "",
-        fileType: isTextBroadcast
+        fileType: isTextArchive
           ? "text/plain"
           : mediaFile?.type || editingItem?.fileType || "",
-        fileSize: isTextBroadcast
+        fileSize: isTextArchive
           ? 0
           : mediaFile?.size || editingItem?.fileSize || "",
-        storageProvider: isTextBroadcast ? "firestore-text" : "cloudinary",
+        storageProvider: isTextArchive ? "firestore-text" : "cloudinary",
       };
 
       if (editingItem) {
-        if (!updateDocumentary) {
-          toast.error("updateDocumentary is not available in your context yet.");
+        if (!updateArchive) {
+          toast.error("updateArchive is not available in your context yet.");
           return;
         }
 
-        await updateDocumentary(editingItem.id, payload);
-        toast.success("Content updated successfully.");
+        await updateArchive(editingItem.id, payload);
+        toast.success("Archive content updated successfully.");
       } else {
-        await addDocumentary(payload);
+        if (!addArchive) {
+          toast.error("addArchive is not available in your context yet.");
+          return;
+        }
+
+        await addArchive(payload);
         toast.success(
-          isTextBroadcast
-            ? "Broadcast text saved successfully."
-            : "Documentary content uploaded successfully."
+          isTextArchive
+            ? "Archive text saved successfully."
+            : "Archive content uploaded successfully."
         );
       }
 
       resetForm();
       setShowAddForm(false);
     } catch (error) {
-      console.error("Error saving documentary content:", error);
-      toast.error(error.message || "Failed to save content.");
+      console.error("Error saving archive content:", error);
+      toast.error(error.message || "Failed to save archive content.");
     } finally {
       setSubmitting(false);
     }
@@ -444,9 +436,9 @@ const Documentary = () => {
           className="w-full h-64 bg-gradient-to-br from-[#087A3D] to-[#12A85C] text-left p-6 rounded-xl flex flex-col justify-between hover:scale-[1.01] transition"
         >
           <div>
-            <FaBroadcastTower className="text-[#F2B705] text-4xl mb-4" />
+            <FaArchive className="text-[#F2B705] text-4xl mb-4" />
             <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-[#F2B705] mb-3">
-              Broadcast Release
+              Archive Record
             </p>
             <h4 className="text-white text-2xl font-extrabold leading-tight">
               {item.title}
@@ -454,11 +446,11 @@ const Documentary = () => {
           </div>
 
           <p className="text-white/90 text-sm line-clamp-3">
-            {item.description || "Click to read full broadcast."}
+            {item.description || "Click to read full archive."}
           </p>
 
           <span className="text-[#F2B705] text-sm font-bold">
-            Click to read full release →
+            Click to read full archive →
           </span>
         </button>
       );
@@ -505,24 +497,24 @@ const Documentary = () => {
   };
 
   return (
-    <section id="documentary" className="bg-[#E9FFF3] py-20 px-5 md:px-20">
+    <section id="archives" className="bg-[#E9FFF3] py-20 px-5 md:px-20">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-3">
-            Documentary & Digital Platforms
+            Archive & Institutional Records
           </p>
 
           <h2 className="text-4xl md:text-5xl font-extrabold text-[#087A3D] mb-5">
-            Documentary & Media
+            Archives
           </h2>
 
           <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Explore videos, photos, clips, official releases, and broadcast
-            write-ups.
+            Explore records, videos, photos, leadership materials, platforms,
+            and archive write-ups.
           </p>
 
           <p className="text-sm text-slate-500 mt-4">
-            Total uploaded content:{" "}
+            Total uploaded archive content:{" "}
             <span className="font-bold text-[#087A3D]">
               {visibleItems.length}
             </span>
@@ -549,16 +541,17 @@ const Documentary = () => {
                 }
               }}
               className="bg-[#087A3D] text-white px-6 py-3 rounded-full inline-flex items-center gap-2 mx-auto font-bold hover:bg-[#12A85C] transition shadow-lg"
+              type="button"
             >
               {showAddForm ? <FaTimes /> : <FaPlus />}
-              {showAddForm ? "Close Form" : "Add Content"}
+              {showAddForm ? "Close Form" : "Add Archive Content"}
             </button>
           </div>
         ) : (
           <div className="bg-white border border-[#C9F5DC] rounded-2xl p-5 text-center shadow-md mb-10 max-w-2xl mx-auto">
             <p className="text-slate-600">
-              Sign in to upload, edit, or delete documentary videos, photos,
-              clips, releases, or broadcast content.
+              Sign in to upload, edit, or delete archive videos, photos,
+              records, platforms, or leadership content.
             </p>
           </div>
         )}
@@ -570,9 +563,7 @@ const Documentary = () => {
           >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
               <h3 className="text-2xl font-extrabold text-[#087A3D]">
-                {editingItem
-                  ? "Edit Documentary Content"
-                  : "Add New Documentary Content"}
+                {editingItem ? "Edit Archive Content" : "Add New Archive Content"}
               </h3>
 
               {editingItem && (
@@ -614,7 +605,7 @@ const Documentary = () => {
                   className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
                   required
                 >
-                  {categoryTabs.map((tab) => (
+                  {archiveTabs.map((tab) => (
                     <option key={tab.value} value={tab.value}>
                       {tab.label}
                     </option>
@@ -634,13 +625,11 @@ const Documentary = () => {
                 >
                   <option value="video">Video</option>
                   <option value="photo">Photo</option>
-                  {formData.category === "broadcast" && (
-                    <option value="text">Broadcast Text</option>
-                  )}
+                  <option value="text">Archive Text</option>
                 </select>
               </div>
 
-              {!isTextBroadcast && (
+              {!isTextArchive && (
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
                     {editingItem
@@ -677,7 +666,7 @@ const Documentary = () => {
                 </div>
               )}
 
-              {!isTextBroadcast && formData.mediaType !== "photo" && (
+              {!isTextArchive && formData.mediaType !== "photo" && (
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
                     Optional Video Thumbnail
@@ -717,7 +706,7 @@ const Documentary = () => {
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Source / Broadcast Channel
+                  Source / Archive Channel
                 </label>
                 <input
                   type="text"
@@ -725,33 +714,31 @@ const Documentary = () => {
                   value={formData.source}
                   onChange={handleChange}
                   className="w-full p-3 border border-[#C9F5DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
-                  placeholder="Example: NTA, YouTube, Facebook, Press Unit"
+                  placeholder="Example: Official Records, Media Unit, YouTube, Press Unit"
                 />
               </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-slate-700 mb-2">
-                  {isTextBroadcast
-                    ? "Broadcast Text *"
-                    : "Description / Caption"}
+                  {isTextArchive ? "Archive Text *" : "Description / Caption"}
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  rows={isTextBroadcast ? "10" : "5"}
+                  rows={isTextArchive ? "10" : "5"}
                   className="w-full p-3 border border-[#C9F5DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
                   placeholder={
-                    isTextBroadcast
-                      ? "Paste or type the full broadcast release here..."
+                    isTextArchive
+                      ? "Paste or type the full archive text here..."
                       : "Write a short description"
                   }
-                  required={isTextBroadcast}
+                  required={isTextArchive}
                 ></textarea>
               </div>
             </div>
 
-            {submitting && !isTextBroadcast && (
+            {submitting && !isTextArchive && (
               <div className="mt-6">
                 <div className="w-full bg-[#E9FFF3] rounded-full h-3 overflow-hidden">
                   <div
@@ -773,13 +760,13 @@ const Documentary = () => {
               {submitting
                 ? editingItem
                   ? "Updating..."
-                  : isTextBroadcast
+                  : isTextArchive
                   ? "Saving..."
                   : "Uploading..."
                 : editingItem
-                ? "Update Content"
-                : isTextBroadcast
-                ? "Save Broadcast Text"
+                ? "Update Archive Content"
+                : isTextArchive
+                ? "Save Archive Text"
                 : "Upload & Save Content"}
             </button>
           </form>
@@ -787,7 +774,7 @@ const Documentary = () => {
 
         <div className="max-w-md mx-auto mb-8">
           <label className="block text-sm font-extrabold uppercase tracking-[0.2em] text-[#087A3D] mb-3 text-center">
-            Select Media Category
+            Select Archive Category
           </label>
 
           <select
@@ -795,7 +782,7 @@ const Documentary = () => {
             onChange={(e) => setActiveCategory(e.target.value)}
             className="w-full bg-white border border-[#C9F5DC] text-[#087A3D] font-bold rounded-2xl px-5 py-4 shadow-md focus:outline-none focus:ring-2 focus:ring-[#12A85C] cursor-pointer"
           >
-            {categoryTabs.map((tab) => (
+            {archiveTabs.map((tab) => (
               <option key={tab.value} value={tab.value}>
                 {tab.label}
               </option>
@@ -814,12 +801,12 @@ const Documentary = () => {
 
         {filteredItems.length === 0 ? (
           <div className="bg-white border border-[#C9F5DC] rounded-2xl p-10 text-center shadow-md">
-            <FaPlayCircle className="text-[#F2B705] text-5xl mx-auto mb-4" />
+            <FaArchive className="text-[#F2B705] text-5xl mx-auto mb-4" />
             <h4 className="text-2xl font-bold text-[#087A3D] mb-2">
-              No content added yet
+              No archive content added yet
             </h4>
             <p className="text-slate-500">
-              Published content will appear here once uploaded.
+              Published archive content will appear here once uploaded.
             </p>
           </div>
         ) : (
@@ -840,10 +827,6 @@ const Documentary = () => {
                     ) : item.mediaType === "photo" ? (
                       <span className="inline-flex items-center gap-1">
                         <FaImage /> Photo
-                      </span>
-                    ) : item.category === "broadcast" ? (
-                      <span className="inline-flex items-center gap-1">
-                        <FaBroadcastTower /> Broadcast
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1">
@@ -911,7 +894,7 @@ const Documentary = () => {
                       onClick={() => setExpandedItem(item)}
                       className="mt-3 text-sm font-bold text-[#087A3D] hover:text-[#12A85C]"
                     >
-                      Read full broadcast
+                      Read full archive
                     </button>
                   )}
 
@@ -1003,7 +986,7 @@ const Documentary = () => {
             <div className="sticky top-0 bg-white border-b border-[#C9F5DC] p-5 flex items-start justify-between gap-4 rounded-t-3xl">
               <div>
                 <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-[#F2B705] mb-2">
-                  Broadcast Release
+                  Archive Record
                 </p>
                 <h3 className="text-2xl md:text-3xl font-extrabold text-[#087A3D]">
                   {expandedItem.title}
@@ -1040,4 +1023,4 @@ const Documentary = () => {
   );
 };
 
-export default Documentary;
+export default Archives;

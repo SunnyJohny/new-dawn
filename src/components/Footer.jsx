@@ -12,7 +12,7 @@ const socialMediaLinks = [
   {
     name: "WhatsApp",
     icon: <FaWhatsapp />,
-    url: "https://wa.me/2348038652949",
+    url: "https://wa.me/2349069060610",
   },
   { name: "Facebook", icon: <FaFacebook />, url: "#" },
   { name: "LinkedIn", icon: <FaLinkedin />, url: "#" },
@@ -25,7 +25,8 @@ const quickLinks = [
   { link: "Programme", path: "programme" },
   { link: "Documentary", path: "documentary" },
   { link: "Archives", path: "archives" },
-  { link: "Contact", path: "contact" }, // ❌ removed "News"
+  { link: "News", path: "news" },
+  { link: "Contact", path: "contact" },
 ];
 
 const programmeLinks = [
@@ -44,7 +45,6 @@ const archiveLinks = [
 
 const handleScrollAdjust = (e, path) => {
   e.preventDefault();
-
   const target = document.getElementById(path);
 
   if (target) {
@@ -60,11 +60,9 @@ const handleScrollAdjust = (e, path) => {
 
 const Footer = () => {
   return (
-    <footer className="bg-[#064e3b] text-white pt-14 pb-6 px-4">
+    <footer className="bg-[#087A3D] text-white pt-14 pb-6 px-4">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-          
-          {/* Brand / Contact */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-5">
               <img
@@ -77,7 +75,7 @@ const Footer = () => {
                 <h2 className="text-2xl font-extrabold uppercase">
                   The New Dawn
                 </h2>
-                <p className="text-[#c7922b] text-sm italic font-semibold">
+                <p className="text-[#F2B705] text-sm italic font-semibold">
                   Leadership in Action, A State in Motion
                 </p>
               </div>
@@ -85,22 +83,19 @@ const Footer = () => {
 
             <p className="text-white/80 leading-relaxed mb-5">
               A strategic multimedia programme for public engagement and
-              enlightenment dedicated to the people of Niger State,
-              powered by Shevet-city Communications in conjunction with the
-              Niger State Government.
+              enlightenment dedicated to the people of Niger State.
             </p>
 
             <div className="space-y-2 text-white/80">
-              <p>Email: info@shevet-citymedia.com</p>
-              <p>Phone: +2348038652949</p>
+              <p>Email: info@nigerstate-newdawn.com</p>
+              <p>Phone: +234 906 906 0610</p>
               <p>Location: Niger State, Nigeria</p>
-              <p>Website: shevet-citymedia.com</p>
+              <p>Website: www.nigerstate-newdawn.com</p>
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h2 className="text-xl font-bold mb-4 text-[#c7922b]">
+            <h2 className="text-xl font-bold mb-4 text-[#F2B705]">
               Quick Links
             </h2>
 
@@ -110,7 +105,7 @@ const Footer = () => {
                   <a
                     href={`#${path}`}
                     onClick={(e) => handleScrollAdjust(e, path)}
-                    className="text-white/70 hover:text-[#c7922b] transition cursor-pointer"
+                    className="text-white/75 hover:text-[#F2B705] transition"
                   >
                     {link}
                   </a>
@@ -119,9 +114,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Programme */}
           <div>
-            <h2 className="text-xl font-bold mb-4 text-[#c7922b]">
+            <h2 className="text-xl font-bold mb-4 text-[#F2B705]">
               Programme
             </h2>
 
@@ -131,7 +125,7 @@ const Footer = () => {
                   <a
                     href={`#${path}`}
                     onClick={(e) => handleScrollAdjust(e, path)}
-                    className="text-white/70 hover:text-[#c7922b] transition cursor-pointer"
+                    className="text-white/75 hover:text-[#F2B705] transition"
                   >
                     {link}
                   </a>
@@ -140,9 +134,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Archives + Social */}
           <div>
-            <h2 className="text-xl font-bold mb-4 text-[#c7922b]">
+            <h2 className="text-xl font-bold mb-4 text-[#F2B705]">
               Archives
             </h2>
 
@@ -152,7 +145,7 @@ const Footer = () => {
                   <a
                     href={`#${path}`}
                     onClick={(e) => handleScrollAdjust(e, path)}
-                    className="text-white/70 hover:text-[#c7922b] transition cursor-pointer"
+                    className="text-white/75 hover:text-[#F2B705] transition"
                   >
                     {link}
                   </a>
@@ -160,7 +153,7 @@ const Footer = () => {
               ))}
             </ul>
 
-            <h2 className="text-xl font-bold mb-4 text-[#c7922b]">
+            <h2 className="text-xl font-bold mb-4 text-[#F2B705]">
               Follow Us
             </h2>
 
@@ -171,8 +164,7 @@ const Footer = () => {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={social.name}
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#c7922b] transition text-xl"
+                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#F2B705] hover:text-[#087A3D] transition text-xl"
                 >
                   {social.icon}
                 </a>
@@ -181,8 +173,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-10 border-t border-white/20 pt-5 text-center">
+        <div className="mt-10 border-t border-[#C9F5DC]/40 pt-5 text-center">
           <p className="text-sm text-white/80">
             &copy; {new Date().getFullYear()} The New Dawn. All rights reserved.
           </p>

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { FaBarsStaggered, FaXmark } from "react-icons/fa6";
+import { useEffect, useRef, useState } from "react";
+import { BsList, BsX } from "react-icons/bs";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -9,7 +9,11 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [pinnedDropdown, setPinnedDropdown] = useState(null);
   const [activeMobileDropdown, setActiveMobileDropdown] = useState(null);
+  const [activeNavItem, setActiveNavItem] = useState("home");
+
+  const closeTimeout = useRef(null);
 
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [showSignUpModal, setShowSignUpModal] = useState(false);
@@ -30,10 +34,46 @@ const Navbar = () => {
     logoutNewDawnUser,
   } = useMyContext();
 
+  const navItems = [
+    { link: "Home", path: "home" },
+    { link: "About", path: "about" },
+    {
+      link: "Programme",
+      path: "programme",
+      dropdown: [
+        { link: "Foundational Documentation", path: "documentation" },
+        { link: "Media & Digital Platforms", path: "media" },
+        { link: "Public Engagement", path: "engagement" },
+        { link: "Strategic Amplification", path: "amplification" },
+      ],
+    },
+    {
+      link: "Documentary",
+      path: "documentary",
+      dropdown: [
+        { link: "Watch Documentary", path: "watch-documentary" },
+        { link: "Trailers & Clips", path: "trailers" },
+        { link: "Behind the Scenes", path: "behind-scenes" },
+        { link: "Photo Highlights", path: "photo-highlights" },
+        { link: "Releases & Broadcast", path: "broadcast" },
+      ],
+    },
+    {
+      link: "Archives",
+      path: "archives",
+      dropdown: [
+        { link: "Records", path: "records" },
+        { link: "Videos", path: "videos" },
+        { link: "Leadership Hub", path: "leadership-hub" },
+        { link: "Platforms", path: "platforms" },
+      ],
+    },
+    { link: "News", path: "news" },
+    { link: "Contact", path: "contact" },
+  ];
+
   useEffect(() => {
-    const handleScroll = () => {
-      setIsSticky(window.scrollY > 40);
-    };
+    const handleScroll = () => setIsSticky(window.scrollY > 40);
 
     window.addEventListener("scroll", handleScroll);
     handleScroll();
@@ -41,46 +81,19 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".desktop-dropdown-area")) {
-        setActiveDropdown(null);
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
-
-  const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev);
-    setActiveMobileDropdown(null);
-  };
+  const displayName =
+    currentUser?.displayName || currentUser?.email?.split("@")[0] || "User";
 
   const closeMobileMenu = () => {
     setIsMenuOpen(false);
     setActiveMobileDropdown(null);
   };
 
-  const toggleMobileDropdown = (name) => {
-    setActiveMobileDropdown((prev) => (prev === name ? null : name));
-  };
-
-  const toggleDesktopDropdown = (e, name) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    setActiveDropdown((prev) => (prev === name ? null : name));
-  };
-
   const scrollToSection = (path) => {
     const target = document.getElementById(path);
 
     if (target) {
-      const offset = 100;
+      const offset = 120;
       const top = target.getBoundingClientRect().top + window.scrollY - offset;
 
       window.scrollTo({
@@ -93,7 +106,9 @@ const Navbar = () => {
   const handleScrollAdjust = (e, path) => {
     e.preventDefault();
 
+    setActiveNavItem(path);
     setActiveDropdown(null);
+    setPinnedDropdown(null);
     setActiveMobileDropdown(null);
 
     if (isMenuOpen) {
@@ -107,6 +122,52 @@ const Navbar = () => {
     }
 
     scrollToSection(path);
+  };
+
+  const isItemActive = (item) => {
+    if (activeNavItem === item.path) return true;
+
+    if (Array.isArray(item.dropdown)) {
+      return item.dropdown.some((child) => child.path === activeNavItem);
+    }
+
+    return false;
+  };
+
+  const openDropdownFor = (name) => {
+    if (closeTimeout.current) {
+      clearTimeout(closeTimeout.current);
+      closeTimeout.current = null;
+    }
+
+    setActiveDropdown(name);
+  };
+
+  const scheduleCloseDropdown = (name) => {
+    if (pinnedDropdown === name) return;
+
+    if (closeTimeout.current) {
+      clearTimeout(closeTimeout.current);
+    }
+
+    closeTimeout.current = setTimeout(() => {
+      setActiveDropdown((prev) => (prev === name ? null : prev));
+      closeTimeout.current = null;
+    }, 180);
+  };
+
+  const toggleDesktopDropdown = (name) => {
+    if (pinnedDropdown === name) {
+      setPinnedDropdown(null);
+      setActiveDropdown(null);
+    } else {
+      setPinnedDropdown(name);
+      setActiveDropdown(name);
+    }
+  };
+
+  const toggleMobileDropdown = (name) => {
+    setActiveMobileDropdown((prev) => (prev === name ? null : name));
   };
 
   const openSignIn = () => {
@@ -178,341 +239,359 @@ const Navbar = () => {
     }
   };
 
-  const displayName =
-    currentUser?.displayName || currentUser?.email?.split("@")[0] || "User";
-
-  const navItems = [
-    { link: "Home", path: "home" },
-    { link: "About", path: "about" },
-    {
-      link: "Programme",
-      path: "programme",
-      dropdown: [
-        { link: "Foundational Documentation", path: "documentation" },
-        { link: "Media & Digital Platforms", path: "media" },
-        { link: "Public Engagement", path: "engagement" },
-        { link: "Strategic Amplification", path: "amplification" },
-      ],
-    },
-    {
-      link: "Documentary",
-      path: "documentary",
-      dropdown: [
-        { link: "Watch Documentary", path: "watch-documentary" },
-        { link: "Trailers & Clips", path: "trailers" },
-        { link: "Behind the Scenes", path: "behind-scenes" },
-        { link: "Photo Highlights", path: "photo-highlights" },
-        { link: "Releases & Broadcast", path: "broadcast" },
-      ],
-    },
-    {
-      link: "Archives",
-      path: "archives",
-      dropdown: [
-        { link: "Records", path: "records" },
-        { link: "Videos", path: "videos" },
-        { link: "Leadership Hub", path: "leadership-hub" },
-        { link: "Platforms", path: "platforms" },
-      ],
-    },
-    { link: "Contact", path: "contact" },
-  ];
-
   return (
     <>
       <ToastContainer />
 
-      <header className="fixed w-full z-50 transition-all duration-300">
-        <nav
-          className={`py-4 lg:px-24 px-4 transition-all duration-300 ${
-            isSticky
-              ? "bg-white shadow-lg"
-              : "bg-white/95 backdrop-blur-md shadow-sm"
+      <header className="fixed top-0 left-0 w-full z-50 transition-all duration-300">
+        <div
+          className={`w-full transition-all duration-300 ${
+            isSticky ? "shadow-lg" : "shadow-sm"
           }`}
         >
-          <div className="flex justify-between items-center text-base relative">
-            <a
-              href="#home"
-              onClick={(e) => handleScrollAdjust(e, "home")}
-              className="flex items-center gap-3"
-            >
-              <img
-                src="/images/New-DawnLogo.png"
-                alt="The New Dawn Logo"
-                className="h-12 w-12 object-contain"
-              />
-
-              <div className="leading-tight">
-                <h1 className="text-lg md:text-xl font-extrabold uppercase text-[#064e3b]">
+          <div className="w-full bg-[#087A3D] text-white text-xs md:text-sm shadow-sm">
+            <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-2 py-2 px-4">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                <span className="font-bold tracking-wide uppercase text-[#F2B705]">
                   The New Dawn
-                </h1>
-                <p className="text-xs md:text-sm text-[#c7922b] font-semibold italic">
-                  Leadership in Action, A State in Motion
-                </p>
+                </span>
+                <span>Leadership in Action</span>
+                <span>A State in Motion</span>
               </div>
-            </a>
 
-            {/* DESKTOP MENU */}
-            <div className="hidden lg:flex items-center space-x-6">
-              <ul className="flex space-x-6 items-center">
-                {navItems.map((item) =>
-                  item.dropdown ? (
-                    <li
-                      key={item.link}
-                      className="relative list-none desktop-dropdown-area"
-                    >
-                      <button
-                        type="button"
-                        onClick={(e) => toggleDesktopDropdown(e, item.link)}
-                        className={`text-sm uppercase font-semibold transition cursor-pointer ${
-                          activeDropdown === item.link
-                            ? "text-[#c7922b]"
-                            : "text-[#181818] hover:text-[#c7922b]"
-                        }`}
-                      >
-                        {item.link}{" "}
-                        <span className="text-[#c7922b]">
-                          {activeDropdown === item.link ? "−" : "+"}
-                        </span>
-                      </button>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {currentUser ? (
+                  <>
+                    <span className="inline-flex items-center gap-2 bg-white/15 border border-white/20 text-white px-3 py-1 rounded-full text-[11px] md:text-xs font-semibold">
+                      <span className="h-2 w-2 rounded-full bg-[#22C55E] inline-block" />
+                      Logged in
+                    </span>
 
-                      {activeDropdown === item.link && (
-                        <div className="absolute top-full left-0 mt-4 w-72 bg-white shadow-xl rounded-xl border border-gray-100 overflow-hidden z-50">
-                          <a
-                            href={`#${item.path}`}
-                            onClick={(e) => handleScrollAdjust(e, item.path)}
-                            className="block px-5 py-3 text-sm font-bold text-[#064e3b] hover:bg-[#064e3b] hover:text-white transition"
-                          >
-                            Overview
-                          </a>
-
-                          {item.dropdown.map(({ link, path }) => (
-                            <a
-                              key={link}
-                              href={`#${path}`}
-                              onClick={(e) => handleScrollAdjust(e, path)}
-                              className="block px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-[#064e3b] hover:text-white transition"
-                            >
-                              {link}
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                    </li>
-                  ) : (
-                    <a
-                      key={item.link}
-                      href={`#${item.path}`}
-                      onClick={(e) => handleScrollAdjust(e, item.path)}
-                      className="text-sm uppercase font-semibold text-[#181818] hover:text-[#c7922b] transition cursor-pointer"
-                    >
-                      {item.link}
-                    </a>
-                  )
-                )}
-              </ul>
-
-              <a
-                href="#watch-documentary"
-                onClick={(e) => handleScrollAdjust(e, "watch-documentary")}
-                className="bg-[#064e3b] text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-[#c7922b] transition"
-              >
-                Watch Documentary
-              </a>
-
-              {currentUser ? (
-                <div className="flex items-center gap-3 border-l border-gray-200 pl-4">
-                  <div className="text-right leading-tight">
-                    <p className="text-xs text-gray-500">Signed in as</p>
-                    <p className="text-sm font-bold text-[#064e3b]">
+                    <span className="bg-white/10 px-3 py-1 rounded-full text-[11px] md:text-xs font-medium max-w-[220px] truncate">
                       {displayName}
-                    </p>
-                  </div>
+                    </span>
 
-                  <button
-                    onClick={handleLogout}
-                    className="bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-red-700 transition"
-                  >
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={openSignIn}
-                    className="border border-[#064e3b] text-[#064e3b] px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#064e3b] hover:text-white transition"
-                  >
-                    Sign In
-                  </button>
-
-                  <button
-                    onClick={openSignUp}
-                    className="bg-[#c7922b] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-[#064e3b] transition"
-                  >
-                    Sign Up
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* MOBILE BUTTON */}
-            <div className="flex items-center lg:hidden">
-              <button
-                onClick={toggleMenu}
-                className="text-[#064e3b] p-2 border border-gray-300 rounded-full"
-              >
-                {isMenuOpen ? (
-                  <FaXmark className="h-6 w-6" />
+                    <button
+                      onClick={handleLogout}
+                      className="bg-red-500 text-white text-xs font-semibold tracking-wide px-4 py-1 rounded-sm uppercase hover:bg-red-600 transition"
+                      type="button"
+                    >
+                      Logout
+                    </button>
+                  </>
                 ) : (
-                  <FaBarsStaggered className="h-6 w-6" />
+                  <>
+                    <span className="bg-white/10 px-3 py-1 rounded-full text-[11px] md:text-xs font-medium">
+                      Not logged in
+                    </span>
+
+                    <button
+                      onClick={openSignIn}
+                      className="bg-[#F2B705] text-[#087A3D] text-xs font-bold tracking-wide px-4 py-1 rounded-sm uppercase hover:bg-white transition"
+                      type="button"
+                    >
+                      Get Started / Login
+                    </button>
+                  </>
                 )}
-              </button>
+              </div>
             </div>
           </div>
 
-          {/* MOBILE MENU */}
-          <div
-            className={`lg:hidden fixed top-0 left-0 w-full h-screen bg-[#064e3b] transition-transform duration-300 transform ${
-              isMenuOpen ? "translate-y-0" : "-translate-y-full"
-            } px-4 overflow-y-auto`}
-          >
-            <div className="flex justify-between items-center p-4 border-b border-white/20">
+          <div className="w-full bg-white border-b border-[#C9F5DC]">
+            <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-3">
               <a
                 href="#home"
                 onClick={(e) => handleScrollAdjust(e, "home")}
-                className="flex items-center gap-3"
+                className="flex items-center gap-3 min-w-0"
               >
                 <img
                   src="/images/New-DawnLogo.png"
                   alt="The New Dawn Logo"
-                  className="h-12 w-12 object-contain"
+                  className="h-16 w-16 md:h-20 md:w-20 object-contain drop-shadow-lg"
                 />
 
-                <div>
-                  <h1 className="text-white text-lg font-extrabold uppercase">
+                <div className="hidden sm:block leading-tight">
+                  <h1 className="text-base md:text-xl font-extrabold uppercase text-[#087A3D] tracking-wide">
                     The New Dawn
                   </h1>
-                  <p className="text-[#c7922b] text-xs italic">
+                  <p className="text-xs md:text-sm text-[#12A85C] font-bold italic">
                     Leadership in Action
                   </p>
                 </div>
               </a>
 
-              <button
-                onClick={toggleMenu}
-                className="text-white p-2 border border-white/30 rounded-full"
+              <nav
+                className="hidden lg:flex items-center justify-end flex-1 gap-6 text-sm font-bold text-[#087A3D] relative"
+                aria-label="Primary"
               >
-                <FaXmark className="h-6 w-6" />
+                {navItems.map((item) => {
+                  const hasDropdown =
+                    Array.isArray(item.dropdown) && item.dropdown.length > 0;
+
+                  const active = isItemActive(item);
+
+                  if (!hasDropdown) {
+                    return (
+                      <a
+                        key={item.link}
+                        href={`#${item.path}`}
+                        onClick={(e) => handleScrollAdjust(e, item.path)}
+                        className={`cursor-pointer uppercase tracking-wide transition ${
+                          active
+                            ? "text-[#F2B705]"
+                            : "text-[#087A3D] hover:text-[#F2B705]"
+                        }`}
+                      >
+                        {item.link}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={item.link}
+                      className="relative"
+                      onMouseEnter={() => openDropdownFor(item.link)}
+                      onMouseLeave={() => scheduleCloseDropdown(item.link)}
+                    >
+                      <button
+                        type="button"
+                        aria-haspopup="true"
+                        aria-expanded={activeDropdown === item.link}
+                        onClick={() => toggleDesktopDropdown(item.link)}
+                        className={`flex items-center gap-2 cursor-pointer uppercase tracking-wide transition ${
+                          active || activeDropdown === item.link
+                            ? "text-[#F2B705]"
+                            : "text-[#087A3D] hover:text-[#F2B705]"
+                        }`}
+                      >
+                        <span>{item.link}</span>
+
+                        <svg
+                          className={`w-3 h-3 transition-transform ${
+                            active || activeDropdown === item.link
+                              ? "text-[#F2B705]"
+                              : "text-[#12A85C]"
+                          } ${activeDropdown === item.link ? "rotate-180" : ""}`}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+
+                      <div
+                        role="menu"
+                        aria-label={`${item.link} submenu`}
+                        className={[
+                          "absolute left-0 mt-3 w-72 bg-white border border-[#C9F5DC] shadow-xl rounded-xl overflow-hidden z-50",
+                          activeDropdown === item.link ? "block" : "hidden",
+                        ].join(" ")}
+                        onMouseEnter={() => openDropdownFor(item.link)}
+                        onMouseLeave={() => scheduleCloseDropdown(item.link)}
+                      >
+                        <ul className="flex flex-col">
+                          <li>
+                            <a
+                              href={`#${item.path}`}
+                              onClick={(e) =>
+                                handleScrollAdjust(e, item.path)
+                              }
+                              className={`block px-5 py-3 text-sm font-bold cursor-pointer transition ${
+                                activeNavItem === item.path
+                                  ? "bg-[#F2B705] text-[#087A3D]"
+                                  : "text-[#087A3D] hover:bg-[#F2B705] hover:text-[#087A3D]"
+                              }`}
+                            >
+                              Overview
+                            </a>
+                          </li>
+
+                          {item.dropdown.map(({ link, path }) => (
+                            <li key={link}>
+                              <a
+                                href={`#${path}`}
+                                onClick={(e) => handleScrollAdjust(e, path)}
+                                className={`block px-5 py-3 text-sm font-semibold cursor-pointer transition ${
+                                  activeNavItem === path
+                                    ? "bg-[#F2B705] text-[#087A3D]"
+                                    : "text-slate-700 hover:bg-[#F2B705] hover:text-[#087A3D]"
+                                }`}
+                              >
+                                {link}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  );
+                })}
+              </nav>
+
+              <button
+                className="lg:hidden text-[#087A3D] text-3xl hover:text-[#F2B705] transition"
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+                aria-label="Toggle navigation"
+                type="button"
+              >
+                {isMenuOpen ? <BsX /> : <BsList />}
               </button>
             </div>
 
-            <ul className="flex flex-col items-center justify-center mt-10 space-y-5 pb-12">
-              {navItems.map((item) =>
-                item.dropdown ? (
-                  <li key={item.link} className="w-full text-center list-none">
-                    <button
-                      type="button"
-                      onClick={() => toggleMobileDropdown(item.link)}
-                      className="text-base uppercase text-white hover:text-[#c7922b] font-semibold transition cursor-pointer"
-                    >
-                      {item.link}{" "}
-                      <span className="text-[#c7922b]">
-                        {activeMobileDropdown === item.link ? "−" : "+"}
-                      </span>
-                    </button>
+            {isMenuOpen && (
+              <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-lg z-50 border-t border-[#C9F5DC]">
+                <nav className="flex flex-col py-3 px-4 text-sm font-bold text-[#087A3D]">
+                  {navItems.map((item) => {
+                    const hasDropdown =
+                      Array.isArray(item.dropdown) &&
+                      item.dropdown.length > 0;
 
-                    {activeMobileDropdown === item.link && (
-                      <div className="mt-4 space-y-3 bg-white/10 rounded-xl py-4 px-3">
+                    const active = isItemActive(item);
+
+                    if (!hasDropdown) {
+                      return (
                         <a
+                          key={item.link}
                           href={`#${item.path}`}
                           onClick={(e) => handleScrollAdjust(e, item.path)}
-                          className="block text-sm text-white font-semibold hover:text-[#c7922b] transition"
+                          className={`py-3 border-b border-[#E9FFF3] uppercase cursor-pointer transition ${
+                            active
+                              ? "text-[#F2B705]"
+                              : "text-[#087A3D] hover:text-[#F2B705]"
+                          }`}
                         >
-                          Overview
+                          {item.link}
                         </a>
+                      );
+                    }
 
-                        {item.dropdown.map(({ link, path }) => (
-                          <a
-                            key={link}
-                            href={`#${path}`}
-                            onClick={(e) => handleScrollAdjust(e, path)}
-                            className="block text-sm text-white/80 hover:text-[#c7922b] font-medium transition"
+                    return (
+                      <div
+                        key={item.link}
+                        className="border-b border-[#E9FFF3]"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            toggleMobileDropdown(item.link);
+                            setActiveNavItem(item.path);
+                          }}
+                          className={`w-full text-left py-3 flex items-center justify-between gap-2 uppercase transition ${
+                            active || activeMobileDropdown === item.link
+                              ? "text-[#F2B705]"
+                              : "text-[#087A3D] hover:text-[#F2B705]"
+                          }`}
+                          aria-expanded={activeMobileDropdown === item.link}
+                        >
+                          <span>{item.link}</span>
+
+                          <svg
+                            className={`w-3 h-3 transition-transform ${
+                              active || activeMobileDropdown === item.link
+                                ? "text-[#F2B705]"
+                                : "text-[#12A85C]"
+                            } ${
+                              activeMobileDropdown === item.link
+                                ? "rotate-180"
+                                : ""
+                            }`}
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            aria-hidden="true"
                           >
-                            {link}
-                          </a>
-                        ))}
+                            <path
+                              fillRule="evenodd"
+                              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+
+                        {activeMobileDropdown === item.link && (
+                          <div className="pl-4 pb-3 bg-[#E9FFF3] rounded-lg mb-2">
+                            <a
+                              href={`#${item.path}`}
+                              onClick={(e) =>
+                                handleScrollAdjust(e, item.path)
+                              }
+                              className={`block py-2 text-sm font-bold cursor-pointer transition ${
+                                activeNavItem === item.path
+                                  ? "text-[#F2B705]"
+                                  : "text-[#087A3D] hover:text-[#F2B705]"
+                              }`}
+                            >
+                              Overview
+                            </a>
+
+                            {item.dropdown.map(({ link, path }) => (
+                              <a
+                                key={link}
+                                href={`#${path}`}
+                                onClick={(e) => handleScrollAdjust(e, path)}
+                                className={`block py-2 text-sm cursor-pointer transition ${
+                                  activeNavItem === path
+                                    ? "text-[#F2B705] font-bold"
+                                    : "text-slate-700 hover:text-[#F2B705]"
+                                }`}
+                              >
+                                {link}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  <div className="mt-3 mb-2">
+                    {currentUser ? (
+                      <div className="flex items-center gap-2 text-xs text-[#087A3D] bg-[#E9FFF3] border border-[#C9F5DC] rounded-lg px-3 py-2">
+                        <span className="h-2 w-2 rounded-full bg-[#12A85C] inline-block" />
+                        <span className="font-semibold">Logged in:</span>
+                        <span className="truncate">{displayName}</span>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                        Not logged in
                       </div>
                     )}
-                  </li>
-                ) : (
-                  <li key={item.link} className="list-none">
-                    <a
-                      href={`#${item.path}`}
-                      onClick={(e) => handleScrollAdjust(e, item.path)}
-                      className="text-base uppercase text-white hover:text-[#c7922b] font-semibold transition cursor-pointer"
+                  </div>
+
+                  {currentUser && (
+                    <button
+                      onClick={handleLogout}
+                      className="mt-2 w-full bg-red-500 text-white py-2 rounded text-xs font-semibold uppercase hover:bg-red-600 transition"
+                      type="button"
                     >
-                      {item.link}
-                    </a>
-                  </li>
-                )
-              )}
-
-              <li className="list-none">
-                <a
-                  href="#watch-documentary"
-                  onClick={(e) => handleScrollAdjust(e, "watch-documentary")}
-                  className="inline-block bg-[#c7922b] text-white px-6 py-3 rounded-full font-semibold mt-4"
-                >
-                  Watch Documentary
-                </a>
-              </li>
-
-              {currentUser ? (
-                <li className="list-none text-center bg-white/10 rounded-xl p-4 w-full">
-                  <p className="text-white/70 text-sm">Signed in as</p>
-                  <p className="text-[#c7922b] font-bold mb-3">{displayName}</p>
-
-                  <button
-                    onClick={handleLogout}
-                    className="bg-red-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-red-700 transition"
-                  >
-                    Logout
-                  </button>
-                </li>
-              ) : (
-                <li className="list-none flex flex-col gap-3 w-full px-8">
-                  <button
-                    onClick={openSignIn}
-                    className="border border-white text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-[#064e3b] transition"
-                  >
-                    Sign In
-                  </button>
-
-                  <button
-                    onClick={openSignUp}
-                    className="bg-[#c7922b] text-white px-6 py-3 rounded-full font-semibold hover:bg-white hover:text-[#064e3b] transition"
-                  >
-                    Sign Up
-                  </button>
-                </li>
-              )}
-            </ul>
+                      Logout
+                    </button>
+                  )}
+                </nav>
+              </div>
+            )}
           </div>
-        </nav>
+        </div>
       </header>
 
-      {/* SIGN IN MODAL */}
       {showSignInModal && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 px-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
             <button
               onClick={closeAuthModals}
               className="absolute top-4 right-4 text-red-600 font-bold text-xl"
+              type="button"
             >
               ×
             </button>
 
-            <h2 className="text-3xl font-extrabold text-[#064e3b] text-center mb-2">
+            <h2 className="text-3xl font-extrabold text-[#087A3D] text-center mb-2">
               Sign In
             </h2>
 
@@ -524,11 +603,12 @@ const Navbar = () => {
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Email Address
               </label>
+
               <input
                 type="email"
                 value={signInEmail}
                 onChange={(e) => setSignInEmail(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#c7922b]"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
                 placeholder="Enter email"
                 required
               />
@@ -536,12 +616,13 @@ const Navbar = () => {
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Password
               </label>
+
               <div className="relative mb-5">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={signInPassword}
                   onChange={(e) => setSignInPassword(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-[#c7922b]"
+                  className="w-full p-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
                   placeholder="Enter password"
                   required
                 />
@@ -561,7 +642,7 @@ const Navbar = () => {
 
               <button
                 type="submit"
-                className="w-full bg-[#064e3b] text-white py-3 rounded-lg font-bold hover:bg-[#c7922b] transition"
+                className="w-full bg-[#087A3D] text-white py-3 rounded-lg font-bold hover:bg-[#12A85C] transition"
               >
                 Sign In
               </button>
@@ -571,7 +652,8 @@ const Navbar = () => {
               Don&apos;t have an account?{" "}
               <button
                 onClick={openSignUp}
-                className="text-[#064e3b] font-bold hover:text-[#c7922b]"
+                className="text-[#087A3D] font-bold hover:text-[#F2B705] transition"
+                type="button"
               >
                 Sign Up
               </button>
@@ -580,18 +662,18 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* SIGN UP MODAL */}
       {showSignUpModal && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 px-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative max-h-[95vh] overflow-y-auto">
             <button
               onClick={closeAuthModals}
               className="absolute top-4 right-4 text-red-600 font-bold text-xl"
+              type="button"
             >
               ×
             </button>
 
-            <h2 className="text-3xl font-extrabold text-[#064e3b] text-center mb-2">
+            <h2 className="text-3xl font-extrabold text-[#087A3D] text-center mb-2">
               Sign Up
             </h2>
 
@@ -603,11 +685,12 @@ const Navbar = () => {
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Full Name
               </label>
+
               <input
                 type="text"
                 value={signUpName}
                 onChange={(e) => setSignUpName(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#c7922b]"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
                 placeholder="Enter full name"
                 required
               />
@@ -615,22 +698,24 @@ const Navbar = () => {
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Phone Number
               </label>
+
               <input
                 type="tel"
                 value={signUpPhone}
                 onChange={(e) => setSignUpPhone(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#c7922b]"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
                 placeholder="Enter phone number"
               />
 
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Email Address
               </label>
+
               <input
                 type="email"
                 value={signUpEmail}
                 onChange={(e) => setSignUpEmail(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#c7922b]"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
                 placeholder="Enter email"
                 required
               />
@@ -638,12 +723,13 @@ const Navbar = () => {
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 Password
               </label>
+
               <div className="relative mb-5">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={signUpPassword}
                   onChange={(e) => setSignUpPassword(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-[#c7922b]"
+                  className="w-full p-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
                   placeholder="Create password"
                   required
                 />
@@ -663,7 +749,7 @@ const Navbar = () => {
 
               <button
                 type="submit"
-                className="w-full bg-[#064e3b] text-white py-3 rounded-lg font-bold hover:bg-[#c7922b] transition"
+                className="w-full bg-[#087A3D] text-white py-3 rounded-lg font-bold hover:bg-[#12A85C] transition"
               >
                 Create Account
               </button>
@@ -673,7 +759,8 @@ const Navbar = () => {
               Already have an account?{" "}
               <button
                 onClick={openSignIn}
-                className="text-[#064e3b] font-bold hover:text-[#c7922b]"
+                className="text-[#087A3D] font-bold hover:text-[#F2B705] transition"
+                type="button"
               >
                 Sign In
               </button>
