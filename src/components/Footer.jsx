@@ -60,7 +60,7 @@ const handleScrollAdjust = (e, path) => {
 
 const Footer = () => {
   return (
-    <footer className="bg-[#087A3D] text-white pt-14 pb-6 px-4">
+    <footer className="bg-[#065F2F] text-white pt-14 pb-6 px-4">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           <div className="lg:col-span-2">
@@ -164,7 +164,8 @@ const Footer = () => {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#F2B705] hover:text-[#087A3D] transition text-xl"
+                  aria-label={social.name}
+                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#F2B705] hover:text-[#065F2F] transition text-xl"
                 >
                   {social.icon}
                 </a>

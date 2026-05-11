@@ -41,7 +41,7 @@ const Contact = () => {
             Contact & Enquiries
           </p>
 
-          <h2 className="text-4xl md:text-5xl font-extrabold text-[#087A3D] mb-5">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#065F2F] mb-5">
             Get in Touch
           </h2>
 
@@ -55,13 +55,12 @@ const Contact = () => {
         </div>
 
         <div className="flex flex-wrap lg:flex-nowrap gap-8 items-stretch">
-          {/* FORM */}
           <form
             ref={form}
             onSubmit={sendEmail}
             className="w-full lg:w-1/2 p-6 md:p-8 border border-[#C9F5DC] bg-white shadow-xl rounded-2xl"
           >
-            <h3 className="text-2xl font-extrabold text-[#087A3D] mb-6">
+            <h3 className="text-2xl font-extrabold text-[#065F2F] mb-6">
               Send a Message
             </h3>
 
@@ -71,7 +70,7 @@ const Contact = () => {
             <input
               type="text"
               name="user_name"
-              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:ring-2 focus:ring-[#12A85C]"
+              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
               required
             />
 
@@ -81,7 +80,7 @@ const Contact = () => {
             <input
               type="email"
               name="user_email"
-              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:ring-2 focus:ring-[#12A85C]"
+              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
               required
             />
 
@@ -91,7 +90,7 @@ const Contact = () => {
             <input
               type="text"
               name="subject"
-              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:ring-2 focus:ring-[#12A85C]"
+              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
               required
             />
 
@@ -101,17 +100,19 @@ const Contact = () => {
             <textarea
               name="message"
               rows="6"
-              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-6 focus:ring-2 focus:ring-[#12A85C]"
+              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
               required
             ></textarea>
 
-            <button className="w-full bg-[#087A3D] text-white py-3 rounded-lg font-bold hover:bg-[#12A85C] transition">
+            <button
+              type="submit"
+              className="w-full bg-[#065F2F] text-white py-3 rounded-lg font-bold hover:bg-[#0B7A3E] transition"
+            >
               Send Message
             </button>
           </form>
 
-          {/* CONTACT INFO */}
-          <div className="w-full lg:w-1/2 bg-[#087A3D] text-white p-8 rounded-2xl shadow-xl">
+          <div className="w-full lg:w-1/2 bg-[#065F2F] text-white p-8 rounded-2xl shadow-xl">
             <h3 className="text-3xl font-extrabold mb-4">
               Contact Information
             </h3>
@@ -136,6 +137,14 @@ const Contact = () => {
               </div>
 
               <div className="flex items-start">
+                <GoLocation className="text-[#F2B705] mr-4 mt-1" />
+                <div>
+                  <p className="font-bold">Location</p>
+                  <p className="text-white/80">Niger State, Nigeria</p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
                 <MdOutlinePublic className="text-[#F2B705] mr-4 mt-1" />
                 <div>
                   <p className="font-bold">Website</p>
@@ -143,7 +152,7 @@ const Contact = () => {
                     href="https://www.nigerstate-newdawn.com"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-white/80 hover:text-[#F2B705]"
+                    className="text-white/80 hover:text-[#F2B705] transition"
                   >
                     www.nigerstate-newdawn.com
                   </a>
@@ -155,10 +164,10 @@ const Contact = () => {
                 <div>
                   <p className="font-bold">WhatsApp</p>
                   <a
-                    href="https://wa.me/2349069060610"
+                    href="https://wa.me/2349069060610?text=Hello%20The%20New%20Dawn%20team%2C%20I%20would%20like%20to%20make%20an%20enquiry."
                     target="_blank"
                     rel="noreferrer"
-                    className="text-white/80 hover:text-[#F2B705]"
+                    className="text-white/80 hover:text-[#F2B705] transition"
                   >
                     Chat Now
                   </a>
@@ -170,15 +179,29 @@ const Contact = () => {
               <p className="font-bold mb-4">Follow Us</p>
 
               <div className="flex gap-4">
-                <div className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#087A3D] transition">
+                <a
+                  href="#"
+                  aria-label="Facebook"
+                  className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#065F2F] transition"
+                >
                   <FaFacebookF />
-                </div>
-                <div className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#087A3D] transition">
+                </a>
+
+                <a
+                  href="#"
+                  aria-label="Instagram"
+                  className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#065F2F] transition"
+                >
                   <FaInstagram />
-                </div>
-                <div className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#087A3D] transition">
+                </a>
+
+                <a
+                  href="#"
+                  aria-label="YouTube"
+                  className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#065F2F] transition"
+                >
                   <FaYoutube />
-                </div>
+                </a>
               </div>
             </div>
           </div>

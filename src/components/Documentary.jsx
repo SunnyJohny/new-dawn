@@ -441,7 +441,7 @@ const Documentary = () => {
         <button
           type="button"
           onClick={() => setExpandedItem(item)}
-          className="w-full h-64 bg-gradient-to-br from-[#087A3D] to-[#12A85C] text-left p-6 rounded-xl flex flex-col justify-between hover:scale-[1.01] transition"
+          className="w-full h-64 bg-gradient-to-br from-[#065F2F] to-[#0B7A3E] text-left p-6 rounded-xl flex flex-col justify-between hover:scale-[1.01] transition"
         >
           <div>
             <FaBroadcastTower className="text-[#F2B705] text-4xl mb-4" />
@@ -490,7 +490,7 @@ const Documentary = () => {
         />
 
         <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-          <span className="h-20 w-20 rounded-full bg-white/95 text-[#087A3D] flex items-center justify-center shadow-2xl group-hover:scale-110 transition">
+          <span className="h-20 w-20 rounded-full bg-white/95 text-[#065F2F] flex items-center justify-center shadow-2xl group-hover:scale-110 transition">
             <FaPlayCircle className="text-5xl" />
           </span>
         </div>
@@ -512,7 +512,7 @@ const Documentary = () => {
             Documentary & Digital Platforms
           </p>
 
-          <h2 className="text-4xl md:text-5xl font-extrabold text-[#087A3D] mb-5">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#065F2F] mb-5">
             Documentary & Media
           </h2>
 
@@ -523,13 +523,13 @@ const Documentary = () => {
 
           <p className="text-sm text-slate-500 mt-4">
             Total uploaded content:{" "}
-            <span className="font-bold text-[#087A3D]">
+            <span className="font-bold text-[#065F2F]">
               {visibleItems.length}
             </span>
           </p>
 
           {currentUser && (
-            <p className="text-xs text-[#087A3D] font-semibold mt-2">
+            <p className="text-xs text-[#065F2F] font-semibold mt-2">
               Signed-in CRUD mode active. Admin restriction can be added later.
             </p>
           )}
@@ -548,7 +548,7 @@ const Documentary = () => {
                   setShowAddForm(true);
                 }
               }}
-              className="bg-[#087A3D] text-white px-6 py-3 rounded-full inline-flex items-center gap-2 mx-auto font-bold hover:bg-[#12A85C] transition shadow-lg"
+              className="bg-[#065F2F] text-white px-6 py-3 rounded-full inline-flex items-center gap-2 mx-auto font-bold hover:bg-[#0B7A3E] transition shadow-lg"
             >
               {showAddForm ? <FaTimes /> : <FaPlus />}
               {showAddForm ? "Close Form" : "Add Content"}
@@ -569,7 +569,7 @@ const Documentary = () => {
             className="mb-10 bg-white p-6 md:p-10 rounded-3xl shadow-xl border border-[#C9F5DC]"
           >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
-              <h3 className="text-2xl font-extrabold text-[#087A3D]">
+              <h3 className="text-2xl font-extrabold text-[#065F2F]">
                 {editingItem
                   ? "Edit Documentary Content"
                   : "Add New Documentary Content"}
@@ -598,7 +598,7 @@ const Documentary = () => {
                   placeholder="Title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full p-3 border border-[#C9F5DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                  className="w-full p-3 border border-[#C9F5DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                   required
                 />
               </div>
@@ -611,7 +611,7 @@ const Documentary = () => {
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                  className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                   required
                 >
                   {categoryTabs.map((tab) => (
@@ -630,7 +630,7 @@ const Documentary = () => {
                   name="mediaType"
                   value={formData.mediaType}
                   onChange={handleChange}
-                  className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                  className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                 >
                   <option value="video">Video</option>
                   <option value="photo">Photo</option>
@@ -651,7 +651,7 @@ const Documentary = () => {
                     type="file"
                     accept="image/*,video/*"
                     onChange={handleMediaFileChange}
-                    className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                    className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                     required={!editingItem}
                   />
 
@@ -662,7 +662,7 @@ const Documentary = () => {
                   {mediaFile && (
                     <p className="text-sm text-slate-500 mt-2">
                       Selected:{" "}
-                      <span className="font-semibold text-[#087A3D]">
+                      <span className="font-semibold text-[#065F2F]">
                         {mediaFile.name}
                       </span>
                     </p>
@@ -686,13 +686,13 @@ const Documentary = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleThumbnailFileChange}
-                    className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                    className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                   />
 
                   {thumbnailFile && (
                     <p className="text-sm text-slate-500 mt-2">
                       Thumbnail:{" "}
-                      <span className="font-semibold text-[#087A3D]">
+                      <span className="font-semibold text-[#065F2F]">
                         {thumbnailFile.name}
                       </span>
                     </p>
@@ -708,7 +708,7 @@ const Documentary = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                  className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                 >
                   <option value="published">Published</option>
                   <option value="draft">Draft</option>
@@ -724,7 +724,7 @@ const Documentary = () => {
                   name="source"
                   value={formData.source}
                   onChange={handleChange}
-                  className="w-full p-3 border border-[#C9F5DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                  className="w-full p-3 border border-[#C9F5DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                   placeholder="Example: NTA, YouTube, Facebook, Press Unit"
                 />
               </div>
@@ -740,7 +740,7 @@ const Documentary = () => {
                   value={formData.description}
                   onChange={handleChange}
                   rows={isTextBroadcast ? "10" : "5"}
-                  className="w-full p-3 border border-[#C9F5DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                  className="w-full p-3 border border-[#C9F5DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                   placeholder={
                     isTextBroadcast
                       ? "Paste or type the full broadcast release here..."
@@ -755,7 +755,7 @@ const Documentary = () => {
               <div className="mt-6">
                 <div className="w-full bg-[#E9FFF3] rounded-full h-3 overflow-hidden">
                   <div
-                    className="bg-[#12A85C] h-3 transition-all"
+                    className="bg-[#0B7A3E] h-3 transition-all"
                     style={{ width: `${uploadProgress}%` }}
                   ></div>
                 </div>
@@ -768,7 +768,7 @@ const Documentary = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-6 bg-[#087A3D] text-white px-8 py-3 rounded-full font-bold hover:bg-[#12A85C] transition disabled:opacity-60 shadow-lg"
+              className="mt-6 bg-[#065F2F] text-white px-8 py-3 rounded-full font-bold hover:bg-[#0B7A3E] transition disabled:opacity-60 shadow-lg"
             >
               {submitting
                 ? editingItem
@@ -786,14 +786,14 @@ const Documentary = () => {
         )}
 
         <div className="max-w-md mx-auto mb-8">
-          <label className="block text-sm font-extrabold uppercase tracking-[0.2em] text-[#087A3D] mb-3 text-center">
+          <label className="block text-sm font-extrabold uppercase tracking-[0.2em] text-[#065F2F] mb-3 text-center">
             Select Media Category
           </label>
 
           <select
             value={activeCategory}
             onChange={(e) => setActiveCategory(e.target.value)}
-            className="w-full bg-white border border-[#C9F5DC] text-[#087A3D] font-bold rounded-2xl px-5 py-4 shadow-md focus:outline-none focus:ring-2 focus:ring-[#12A85C] cursor-pointer"
+            className="w-full bg-white border border-[#C9F5DC] text-[#065F2F] font-bold rounded-2xl px-5 py-4 shadow-md focus:outline-none focus:ring-2 focus:ring-[#0B7A3E] cursor-pointer"
           >
             {categoryTabs.map((tab) => (
               <option key={tab.value} value={tab.value}>
@@ -807,7 +807,7 @@ const Documentary = () => {
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-2">
             Viewing
           </p>
-          <h3 className="text-3xl font-extrabold text-[#087A3D]">
+          <h3 className="text-3xl font-extrabold text-[#065F2F]">
             {getCategoryTitle(activeCategory)}
           </h3>
         </div>
@@ -815,7 +815,7 @@ const Documentary = () => {
         {filteredItems.length === 0 ? (
           <div className="bg-white border border-[#C9F5DC] rounded-2xl p-10 text-center shadow-md">
             <FaPlayCircle className="text-[#F2B705] text-5xl mx-auto mb-4" />
-            <h4 className="text-2xl font-bold text-[#087A3D] mb-2">
+            <h4 className="text-2xl font-bold text-[#065F2F] mb-2">
               No content added yet
             </h4>
             <p className="text-slate-500">
@@ -832,7 +832,7 @@ const Documentary = () => {
                 <div className="relative overflow-hidden rounded-xl">
                   {renderMedia(item)}
 
-                  <div className="absolute top-4 left-4 z-30 bg-[#087A3D] text-white text-xs font-bold px-3 py-1 rounded-full pointer-events-none">
+                  <div className="absolute top-4 left-4 z-30 bg-[#065F2F] text-white text-xs font-bold px-3 py-1 rounded-full pointer-events-none">
                     {item.mediaType === "text" ? (
                       <span className="inline-flex items-center gap-1">
                         <FaFileAlt /> Text
@@ -856,7 +856,7 @@ const Documentary = () => {
                     <div className="absolute top-4 right-4 z-40 flex gap-2">
                       <button
                         onClick={() => handleEdit(item)}
-                        className="bg-white text-[#087A3D] h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#12A85C] hover:text-white transition"
+                        className="bg-white text-[#065F2F] h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition"
                         type="button"
                         title="Edit"
                       >
@@ -886,7 +886,7 @@ const Documentary = () => {
                       <span
                         className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
                           item.status === "published"
-                            ? "bg-[#E9FFF3] text-[#087A3D] border border-[#C9F5DC]"
+                            ? "bg-[#E9FFF3] text-[#065F2F] border border-[#C9F5DC]"
                             : "bg-yellow-50 text-yellow-700 border border-yellow-200"
                         }`}
                       >
@@ -895,7 +895,7 @@ const Documentary = () => {
                     )}
                   </div>
 
-                  <h4 className="font-bold text-lg text-[#087A3D]">
+                  <h4 className="font-bold text-lg text-[#065F2F]">
                     {item.title}
                   </h4>
 
@@ -909,7 +909,7 @@ const Documentary = () => {
                     <button
                       type="button"
                       onClick={() => setExpandedItem(item)}
-                      className="mt-3 text-sm font-bold text-[#087A3D] hover:text-[#12A85C]"
+                      className="mt-3 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
                     >
                       Read full broadcast
                     </button>
@@ -919,7 +919,7 @@ const Documentary = () => {
                     <button
                       type="button"
                       onClick={() => setPlayingVideo(item)}
-                      className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#087A3D] hover:text-[#12A85C]"
+                      className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
                     >
                       <FaPlayCircle />
                       Play video
@@ -1005,7 +1005,7 @@ const Documentary = () => {
                 <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-[#F2B705] mb-2">
                   Broadcast Release
                 </p>
-                <h3 className="text-2xl md:text-3xl font-extrabold text-[#087A3D]">
+                <h3 className="text-2xl md:text-3xl font-extrabold text-[#065F2F]">
                   {expandedItem.title}
                 </h3>
                 {expandedItem.source && (

@@ -249,7 +249,7 @@ const Navbar = () => {
             isSticky ? "shadow-lg" : "shadow-sm"
           }`}
         >
-          <div className="w-full bg-[#087A3D] text-white text-xs md:text-sm shadow-sm">
+          <div className="w-full bg-[#065F2F] text-white text-xs md:text-sm shadow-sm">
             <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-2 py-2 px-4">
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
                 <span className="font-bold tracking-wide uppercase text-[#F2B705]">
@@ -287,7 +287,7 @@ const Navbar = () => {
 
                     <button
                       onClick={openSignIn}
-                      className="bg-[#F2B705] text-[#087A3D] text-xs font-bold tracking-wide px-4 py-1 rounded-sm uppercase hover:bg-white transition"
+                      className="bg-[#F2B705] text-[#065F2F] text-xs font-bold tracking-wide px-4 py-1 rounded-sm uppercase hover:bg-white transition"
                       type="button"
                     >
                       Get Started / Login
@@ -312,17 +312,17 @@ const Navbar = () => {
                 />
 
                 <div className="hidden sm:block leading-tight">
-                  <h1 className="text-base md:text-xl font-extrabold uppercase text-[#087A3D] tracking-wide">
+                  <h1 className="text-base md:text-xl font-extrabold uppercase text-[#065F2F] tracking-wide">
                     The New Dawn
                   </h1>
-                  <p className="text-xs md:text-sm text-[#12A85C] font-bold italic">
+                  <p className="text-xs md:text-sm text-[#0B7A3E] font-bold italic">
                     Leadership in Action
                   </p>
                 </div>
               </a>
 
               <nav
-                className="hidden lg:flex items-center justify-end flex-1 gap-6 text-sm font-bold text-[#087A3D] relative"
+                className="hidden lg:flex items-center justify-end flex-1 gap-6 text-sm font-bold text-[#065F2F] relative"
                 aria-label="Primary"
               >
                 {navItems.map((item) => {
@@ -340,7 +340,7 @@ const Navbar = () => {
                         className={`cursor-pointer uppercase tracking-wide transition ${
                           active
                             ? "text-[#F2B705]"
-                            : "text-[#087A3D] hover:text-[#F2B705]"
+                            : "text-[#065F2F] hover:text-[#F2B705]"
                         }`}
                       >
                         {item.link}
@@ -363,7 +363,7 @@ const Navbar = () => {
                         className={`flex items-center gap-2 cursor-pointer uppercase tracking-wide transition ${
                           active || activeDropdown === item.link
                             ? "text-[#F2B705]"
-                            : "text-[#087A3D] hover:text-[#F2B705]"
+                            : "text-[#065F2F] hover:text-[#F2B705]"
                         }`}
                       >
                         <span>{item.link}</span>
@@ -372,7 +372,7 @@ const Navbar = () => {
                           className={`w-3 h-3 transition-transform ${
                             active || activeDropdown === item.link
                               ? "text-[#F2B705]"
-                              : "text-[#12A85C]"
+                              : "text-[#0B7A3E]"
                           } ${activeDropdown === item.link ? "rotate-180" : ""}`}
                           viewBox="0 0 20 20"
                           fill="currentColor"
@@ -405,8 +405,8 @@ const Navbar = () => {
                               }
                               className={`block px-5 py-3 text-sm font-bold cursor-pointer transition ${
                                 activeNavItem === item.path
-                                  ? "bg-[#F2B705] text-[#087A3D]"
-                                  : "text-[#087A3D] hover:bg-[#F2B705] hover:text-[#087A3D]"
+                                  ? "bg-[#F2B705] text-[#065F2F]"
+                                  : "text-[#065F2F] hover:bg-[#F2B705] hover:text-[#065F2F]"
                               }`}
                             >
                               Overview
@@ -420,8 +420,8 @@ const Navbar = () => {
                                 onClick={(e) => handleScrollAdjust(e, path)}
                                 className={`block px-5 py-3 text-sm font-semibold cursor-pointer transition ${
                                   activeNavItem === path
-                                    ? "bg-[#F2B705] text-[#087A3D]"
-                                    : "text-slate-700 hover:bg-[#F2B705] hover:text-[#087A3D]"
+                                    ? "bg-[#F2B705] text-[#065F2F]"
+                                    : "text-slate-700 hover:bg-[#F2B705] hover:text-[#065F2F]"
                                 }`}
                               >
                                 {link}
@@ -436,7 +436,7 @@ const Navbar = () => {
               </nav>
 
               <button
-                className="lg:hidden text-[#087A3D] text-3xl hover:text-[#F2B705] transition"
+                className="lg:hidden text-[#065F2F] text-3xl hover:text-[#F2B705] transition"
                 onClick={() => setIsMenuOpen((prev) => !prev)}
                 aria-label="Toggle navigation"
                 type="button"
@@ -447,7 +447,7 @@ const Navbar = () => {
 
             {isMenuOpen && (
               <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-lg z-50 border-t border-[#C9F5DC]">
-                <nav className="flex flex-col py-3 px-4 text-sm font-bold text-[#087A3D]">
+                <nav className="flex flex-col py-3 px-4 text-sm font-bold text-[#065F2F]">
                   {navItems.map((item) => {
                     const hasDropdown =
                       Array.isArray(item.dropdown) &&
@@ -464,7 +464,7 @@ const Navbar = () => {
                           className={`py-3 border-b border-[#E9FFF3] uppercase cursor-pointer transition ${
                             active
                               ? "text-[#F2B705]"
-                              : "text-[#087A3D] hover:text-[#F2B705]"
+                              : "text-[#065F2F] hover:text-[#F2B705]"
                           }`}
                         >
                           {item.link}
@@ -486,7 +486,7 @@ const Navbar = () => {
                           className={`w-full text-left py-3 flex items-center justify-between gap-2 uppercase transition ${
                             active || activeMobileDropdown === item.link
                               ? "text-[#F2B705]"
-                              : "text-[#087A3D] hover:text-[#F2B705]"
+                              : "text-[#065F2F] hover:text-[#F2B705]"
                           }`}
                           aria-expanded={activeMobileDropdown === item.link}
                         >
@@ -496,7 +496,7 @@ const Navbar = () => {
                             className={`w-3 h-3 transition-transform ${
                               active || activeMobileDropdown === item.link
                                 ? "text-[#F2B705]"
-                                : "text-[#12A85C]"
+                                : "text-[#0B7A3E]"
                             } ${
                               activeMobileDropdown === item.link
                                 ? "rotate-180"
@@ -524,7 +524,7 @@ const Navbar = () => {
                               className={`block py-2 text-sm font-bold cursor-pointer transition ${
                                 activeNavItem === item.path
                                   ? "text-[#F2B705]"
-                                  : "text-[#087A3D] hover:text-[#F2B705]"
+                                  : "text-[#065F2F] hover:text-[#F2B705]"
                               }`}
                             >
                               Overview
@@ -552,8 +552,8 @@ const Navbar = () => {
 
                   <div className="mt-3 mb-2">
                     {currentUser ? (
-                      <div className="flex items-center gap-2 text-xs text-[#087A3D] bg-[#E9FFF3] border border-[#C9F5DC] rounded-lg px-3 py-2">
-                        <span className="h-2 w-2 rounded-full bg-[#12A85C] inline-block" />
+                      <div className="flex items-center gap-2 text-xs text-[#065F2F] bg-[#E9FFF3] border border-[#C9F5DC] rounded-lg px-3 py-2">
+                        <span className="h-2 w-2 rounded-full bg-[#0B7A3E] inline-block" />
                         <span className="font-semibold">Logged in:</span>
                         <span className="truncate">{displayName}</span>
                       </div>
@@ -591,7 +591,7 @@ const Navbar = () => {
               ×
             </button>
 
-            <h2 className="text-3xl font-extrabold text-[#087A3D] text-center mb-2">
+            <h2 className="text-3xl font-extrabold text-[#065F2F] text-center mb-2">
               Sign In
             </h2>
 
@@ -608,7 +608,7 @@ const Navbar = () => {
                 type="email"
                 value={signInEmail}
                 onChange={(e) => setSignInEmail(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                 placeholder="Enter email"
                 required
               />
@@ -622,7 +622,7 @@ const Navbar = () => {
                   type={showPassword ? "text" : "password"}
                   value={signInPassword}
                   onChange={(e) => setSignInPassword(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                  className="w-full p-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                   placeholder="Enter password"
                   required
                 />
@@ -642,7 +642,7 @@ const Navbar = () => {
 
               <button
                 type="submit"
-                className="w-full bg-[#087A3D] text-white py-3 rounded-lg font-bold hover:bg-[#12A85C] transition"
+                className="w-full bg-[#065F2F] text-white py-3 rounded-lg font-bold hover:bg-[#0B7A3E] transition"
               >
                 Sign In
               </button>
@@ -652,7 +652,7 @@ const Navbar = () => {
               Don&apos;t have an account?{" "}
               <button
                 onClick={openSignUp}
-                className="text-[#087A3D] font-bold hover:text-[#F2B705] transition"
+                className="text-[#065F2F] font-bold hover:text-[#F2B705] transition"
                 type="button"
               >
                 Sign Up
@@ -673,7 +673,7 @@ const Navbar = () => {
               ×
             </button>
 
-            <h2 className="text-3xl font-extrabold text-[#087A3D] text-center mb-2">
+            <h2 className="text-3xl font-extrabold text-[#065F2F] text-center mb-2">
               Sign Up
             </h2>
 
@@ -690,7 +690,7 @@ const Navbar = () => {
                 type="text"
                 value={signUpName}
                 onChange={(e) => setSignUpName(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                 placeholder="Enter full name"
                 required
               />
@@ -703,7 +703,7 @@ const Navbar = () => {
                 type="tel"
                 value={signUpPhone}
                 onChange={(e) => setSignUpPhone(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                 placeholder="Enter phone number"
               />
 
@@ -715,7 +715,7 @@ const Navbar = () => {
                 type="email"
                 value={signUpEmail}
                 onChange={(e) => setSignUpEmail(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                 placeholder="Enter email"
                 required
               />
@@ -729,7 +729,7 @@ const Navbar = () => {
                   type={showPassword ? "text" : "password"}
                   value={signUpPassword}
                   onChange={(e) => setSignUpPassword(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-[#12A85C]"
+                  className="w-full p-3 border border-gray-300 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
                   placeholder="Create password"
                   required
                 />
@@ -749,7 +749,7 @@ const Navbar = () => {
 
               <button
                 type="submit"
-                className="w-full bg-[#087A3D] text-white py-3 rounded-lg font-bold hover:bg-[#12A85C] transition"
+                className="w-full bg-[#065F2F] text-white py-3 rounded-lg font-bold hover:bg-[#0B7A3E] transition"
               >
                 Create Account
               </button>
@@ -759,7 +759,7 @@ const Navbar = () => {
               Already have an account?{" "}
               <button
                 onClick={openSignIn}
-                className="text-[#087A3D] font-bold hover:text-[#F2B705] transition"
+                className="text-[#065F2F] font-bold hover:text-[#F2B705] transition"
                 type="button"
               >
                 Sign In

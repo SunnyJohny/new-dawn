@@ -153,7 +153,7 @@ const AboutUs = () => {
           About The Initiative
         </p>
 
-        <h2 className="text-4xl md:text-5xl font-extrabold text-[#087A3D] mb-5 tracking-tight">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-[#065F2F] mb-5 tracking-tight">
           The New Dawn
         </h2>
 
@@ -170,26 +170,26 @@ const AboutUs = () => {
           <img
             src="/images/New-DawnLogo.png"
             alt="The New Dawn"
-            className="w-full max-h-[520px] rounded-2xl shadow-xl object-contain bg-[#087A3D] p-8"
+            className="w-full max-h-[520px] rounded-2xl shadow-xl object-contain bg-[#065F2F] p-8"
           />
 
           <div className="absolute -bottom-6 left-6 right-6 bg-white shadow-xl rounded-xl p-5 border-l-4 border-[#F2B705]">
             <p className="text-sm uppercase tracking-wide text-gray-500 font-semibold">
               Slogan
             </p>
-            <h3 className="text-xl md:text-2xl font-extrabold text-[#087A3D]">
+            <h3 className="text-xl md:text-2xl font-extrabold text-[#065F2F]">
               Leadership in Action, A State in Motion.
             </h3>
           </div>
         </div>
 
         <div className="pt-8 lg:pt-0">
-          <h3 className="text-3xl font-extrabold text-[#087A3D] mb-5">
+          <h3 className="text-3xl font-extrabold text-[#065F2F] mb-5">
             Capturing Governance in Motion
           </h3>
 
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            <strong className="text-[#087A3D]">The New Dawn</strong> is an
+            <strong className="text-[#065F2F]">The New Dawn</strong> is an
             initiative of{" "}
             <strong className="text-[#F2B705]">
               Shevet-city Communications
@@ -197,7 +197,7 @@ const AboutUs = () => {
             in conjunction with the Niger State Government, created to celebrate
             the development agenda and progress of Niger State under the
             leadership of{" "}
-            <strong className="text-[#087A3D]">
+            <strong className="text-[#065F2F]">
               His Excellency, Farmer Governor Mohammed Umaru Bago.
             </strong>
           </p>
@@ -220,7 +220,7 @@ const AboutUs = () => {
             <button
               type="button"
               onClick={() => toggleInfoCard("lgas")}
-              className="bg-[#087A3D] text-white rounded-xl p-5 text-center hover:scale-[1.02] transition shadow-md"
+              className="bg-[#065F2F] text-white rounded-xl p-5 text-center hover:bg-[#0B7A3E] hover:scale-[1.02] transition shadow-md"
             >
               <h4 className="text-2xl font-extrabold">25</h4>
               <p className="text-sm text-white/80">LGAs</p>
@@ -232,11 +232,11 @@ const AboutUs = () => {
             <button
               type="button"
               onClick={() => toggleInfoCard("zones")}
-              className="bg-[#F2B705] text-[#087A3D] rounded-xl p-5 text-center hover:scale-[1.02] transition shadow-md"
+              className="bg-[#F2B705] text-[#065F2F] rounded-xl p-5 text-center hover:scale-[1.02] transition shadow-md"
             >
               <h4 className="text-2xl font-extrabold">3</h4>
-              <p className="text-sm text-[#087A3D]/80">Senatorial Zones</p>
-              <p className="text-xs text-[#087A3D] font-bold mt-2">
+              <p className="text-sm text-[#065F2F]/80">Senatorial Zones</p>
+              <p className="text-xs text-[#065F2F] font-bold mt-2">
                 Click to view
               </p>
             </button>
@@ -244,7 +244,7 @@ const AboutUs = () => {
             <button
               type="button"
               onClick={() => toggleInfoCard("narrative")}
-              className="bg-[#12A85C] text-white rounded-xl p-5 text-center hover:scale-[1.02] transition shadow-md"
+              className="bg-[#0B7A3E] text-white rounded-xl p-5 text-center hover:bg-[#065F2F] hover:scale-[1.02] transition shadow-md"
             >
               <h4 className="text-2xl font-extrabold">1</h4>
               <p className="text-sm text-white/80">Shared Narrative</p>
@@ -262,7 +262,7 @@ const AboutUs = () => {
             >
               {openInfoCard === "lgas" && (
                 <div>
-                  <h4 className="text-xl font-extrabold text-[#087A3D] mb-3">
+                  <h4 className="text-xl font-extrabold text-[#065F2F] mb-3">
                     25 Local Government Areas in Niger State
                   </h4>
 
@@ -270,7 +270,7 @@ const AboutUs = () => {
                     {allLgas.map((lga, index) => (
                       <span
                         key={lga}
-                        className="bg-[#E9FFF3] border border-[#C9F5DC] text-[#087A3D] rounded-lg px-3 py-2 text-sm font-semibold"
+                        className="bg-[#E9FFF3] border border-[#C9F5DC] text-[#065F2F] rounded-lg px-3 py-2 text-sm font-semibold"
                       >
                         {index + 1}. {lga}
                       </span>
@@ -281,7 +281,7 @@ const AboutUs = () => {
 
               {openInfoCard === "zones" && (
                 <div>
-                  <h4 className="text-xl font-extrabold text-[#087A3D] mb-4">
+                  <h4 className="text-xl font-extrabold text-[#065F2F] mb-4">
                     Senatorial Zones and LGAs
                   </h4>
 
@@ -292,10 +292,10 @@ const AboutUs = () => {
                         className="bg-[#E9FFF3] border border-[#C9F5DC] rounded-xl p-4"
                       >
                         <div className="flex items-center justify-between gap-3 mb-3">
-                          <h5 className="font-extrabold text-[#087A3D]">
+                          <h5 className="font-extrabold text-[#065F2F]">
                             {zone.zone}
                           </h5>
-                          <span className="text-xs font-bold bg-[#F2B705] text-[#087A3D] px-3 py-1 rounded-full">
+                          <span className="text-xs font-bold bg-[#F2B705] text-[#065F2F] px-3 py-1 rounded-full">
                             {zone.alias}
                           </span>
                         </div>
@@ -318,7 +318,7 @@ const AboutUs = () => {
 
               {openInfoCard === "narrative" && (
                 <div>
-                  <h4 className="text-xl font-extrabold text-[#087A3D] mb-3">
+                  <h4 className="text-xl font-extrabold text-[#065F2F] mb-3">
                     One Shared Narrative
                   </h4>
 
@@ -340,7 +340,7 @@ const AboutUs = () => {
           Programme Framework
         </p>
 
-        <h2 className="text-3xl md:text-4xl font-extrabold text-[#087A3D] mb-6">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-[#065F2F] mb-6">
           Human-Centred Storytelling & Public Enlightenment
         </h2>
 
@@ -363,12 +363,12 @@ const AboutUs = () => {
                   className="flex justify-center mb-5"
                   animate={iconAnimations[index % iconAnimations.length].animate}
                 >
-                  <div className="w-16 h-16 rounded-full bg-[#087A3D] flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-[#065F2F] flex items-center justify-center">
                     <IconComponent size={30} className="text-[#F2B705]" />
                   </div>
                 </motion.div>
 
-                <h3 className="text-xl font-extrabold text-[#087A3D] mb-3">
+                <h3 className="text-xl font-extrabold text-[#065F2F] mb-3">
                   {pillar.title}
                 </h3>
 
@@ -382,13 +382,13 @@ const AboutUs = () => {
       </div>
 
       <div className="bg-white rounded-3xl p-6 md:p-12 mb-20 shadow-md border border-[#C9F5DC]">
-        <h3 className="text-3xl md:text-4xl font-extrabold text-[#087A3D] text-center uppercase tracking-wide mb-10">
+        <h3 className="text-3xl md:text-4xl font-extrabold text-[#065F2F] text-center uppercase tracking-wide mb-10">
           Vision & Mission
         </h3>
 
         <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <h4 className="text-2xl font-bold text-[#087A3D] mb-4">Vision</h4>
+            <h4 className="text-2xl font-bold text-[#065F2F] mb-4">Vision</h4>
             <p className="text-lg text-gray-700 bg-[#E9FFF3] p-6 border-l-4 border-[#F2B705] rounded-xl shadow-md leading-relaxed">
               To position The New Dawn as a structured leadership platform that
               captures governance in motion, preserves verified progress, and
@@ -398,8 +398,8 @@ const AboutUs = () => {
           </div>
 
           <div>
-            <h4 className="text-2xl font-bold text-[#087A3D] mb-4">Mission</h4>
-            <p className="text-lg text-gray-700 bg-[#E9FFF3] p-6 border-l-4 border-[#087A3D] rounded-xl shadow-md leading-relaxed">
+            <h4 className="text-2xl font-bold text-[#065F2F] mb-4">Mission</h4>
+            <p className="text-lg text-gray-700 bg-[#E9FFF3] p-6 border-l-4 border-[#065F2F] rounded-xl shadow-md leading-relaxed">
               To document, package, and disseminate the administration’s
               development agenda through research, documentary production,
               public engagement, digital platforms, archives, and strategic
@@ -409,7 +409,7 @@ const AboutUs = () => {
         </div>
       </div>
 
-      <div className="bg-[#087A3D] text-white rounded-3xl p-8 md:p-14 shadow-xl">
+      <div className="bg-[#065F2F] text-white rounded-3xl p-8 md:p-14 shadow-xl">
         <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-3 text-center">
           Expected Outcome
         </p>
