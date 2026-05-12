@@ -8,7 +8,11 @@ import {
 } from "react-icons/fa";
 
 const socialMediaLinks = [
-  { name: "YouTube", icon: <FaYoutube />, url: "#" },
+  {
+    name: "YouTube",
+    icon: <FaYoutube />,
+    url: "https://youtube.com/@james-healpam?si=p_VnmAI5V70FI1kH",
+  },
   {
     name: "WhatsApp",
     icon: <FaWhatsapp />,
@@ -76,7 +80,7 @@ const Footer = () => {
                   The New Dawn
                 </h2>
                 <p className="text-[#F2B705] text-sm italic font-semibold">
-                  Leadership in Action, A State in Motion
+                  Leadership in Action - A State in Motion
                 </p>
               </div>
             </div>
