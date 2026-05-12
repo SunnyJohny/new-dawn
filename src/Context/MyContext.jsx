@@ -51,6 +51,12 @@ export const MyContextProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [comments, setComments] = useState([]);
 
+  const [selectedDocumentaryCategory, setSelectedDocumentaryCategory] =
+    useState("watch-documentary");
+
+  const [selectedArchiveCategory, setSelectedArchiveCategory] =
+    useState("records");
+
   const [loading, setLoading] = useState(true);
 
   const newDawnDocRef = doc(db, "newDawn", NEW_DAWN_ID);
@@ -68,7 +74,7 @@ export const MyContextProvider = ({ children }) => {
           newDawnDocRef,
           {
             title: "The New Dawn",
-            slogan: "Leadership in Action, A State in Motion",
+            slogan: "Leadership in Action - A State in Motion",
             organization: "Shevet-city Communications",
             partner: "Niger State Government",
             description:
@@ -424,6 +430,11 @@ export const MyContextProvider = ({ children }) => {
         currentUser,
         signedInUserData,
         newDawnProfile,
+
+        selectedDocumentaryCategory,
+        setSelectedDocumentaryCategory,
+        selectedArchiveCategory,
+        setSelectedArchiveCategory,
 
         users,
 

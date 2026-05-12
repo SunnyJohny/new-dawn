@@ -38,9 +38,12 @@ const Archives = () => {
     addArchive,
     updateArchive,
     deleteArchive,
+    selectedArchiveCategory = "records",
+    setSelectedArchiveCategory,
   } = useMyContext();
 
-  const [activeCategory, setActiveCategory] = useState("records");
+  const activeCategory = selectedArchiveCategory || "records";
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -98,6 +101,12 @@ const Archives = () => {
   const closeForm = () => {
     resetForm();
     setShowAddForm(false);
+  };
+
+  const handleVisibleCategoryChange = (value) => {
+    if (setSelectedArchiveCategory) {
+      setSelectedArchiveCategory(value);
+    }
   };
 
   const handleChange = (e) => {
@@ -420,6 +429,7 @@ const Archives = () => {
         );
       }
 
+      handleVisibleCategoryChange(formData.category);
       resetForm();
       setShowAddForm(false);
     } catch (error) {
@@ -532,7 +542,7 @@ const Archives = () => {
           <div className="w-24 h-1 bg-[#F2B705] mx-auto mt-6 rounded-full"></div>
         </div>
 
-        {currentUser ? (
+        {currentUser && (
           <div className="text-center mb-6">
             <button
               onClick={() => {
@@ -549,13 +559,6 @@ const Archives = () => {
               {showAddForm ? <FaTimes /> : <FaPlus />}
               {showAddForm ? "Close Form" : "Add Archive Content"}
             </button>
-          </div>
-        ) : (
-          <div className="bg-white border border-[#C9F5DC] rounded-2xl p-5 text-center shadow-md mb-10 max-w-2xl mx-auto">
-            <p className="text-slate-600">
-              Sign in to upload, edit, or delete archive videos, photos,
-              records, platforms, or leadership content.
-            </p>
           </div>
         )}
 
@@ -782,7 +785,7 @@ const Archives = () => {
 
           <select
             value={activeCategory}
-            onChange={(e) => setActiveCategory(e.target.value)}
+            onChange={(e) => handleVisibleCategoryChange(e.target.value)}
             className="w-full bg-white border border-[#C9F5DC] text-[#065F2F] font-bold rounded-2xl px-5 py-4 shadow-md focus:outline-none focus:ring-2 focus:ring-[#0B7A3E] cursor-pointer"
           >
             {archiveTabs.map((tab) => (

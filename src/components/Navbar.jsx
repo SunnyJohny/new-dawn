@@ -32,44 +32,118 @@ const Navbar = () => {
     signInNewDawnUser,
     signUpNewDawnUser,
     logoutNewDawnUser,
+    setSelectedDocumentaryCategory,
+    setSelectedArchiveCategory,
   } = useMyContext();
 
   const navItems = [
     { link: "Home", path: "home" },
-    { link: "About", path: "about" },
+    {
+      link: "About",
+      path: "about",
+      children: [
+        { link: "The Initiative", path: "about" },
+        { link: "Programme Framework", path: "programme" },
+        { link: "Vision & Mission", path: "vision-mission" },
+        { link: "Expected Outcome", path: "expected-outcome" },
+      ],
+    },
     {
       link: "Programme",
       path: "programme",
-      dropdown: [
+      children: [
         { link: "Foundational Documentation", path: "documentation" },
-        { link: "Media & Digital Platforms", path: "media" },
+        { link: "Documentary & Digital Platforms", path: "media" },
         { link: "Public Engagement", path: "engagement" },
         { link: "Strategic Amplification", path: "amplification" },
+        { link: "Archives", path: "archives-framework" },
+        { link: "Public Accountability", path: "accountability" },
       ],
     },
     {
       link: "Documentary",
       path: "documentary",
-      dropdown: [
-        { link: "Watch Documentary", path: "watch-documentary" },
-        { link: "Trailers & Clips", path: "trailers" },
-        { link: "Behind the Scenes", path: "behind-scenes" },
-        { link: "Photo Highlights", path: "photo-highlights" },
-        { link: "Releases & Broadcast", path: "broadcast" },
+      children: [
+        {
+          link: "Overview",
+          path: "documentary",
+          documentaryCategory: "watch-documentary",
+        },
+        {
+          link: "Watch Documentary",
+          path: "documentary",
+          documentaryCategory: "watch-documentary",
+        },
+        {
+          link: "Trailers & Clips",
+          path: "documentary",
+          documentaryCategory: "trailers",
+        },
+        {
+          link: "Behind the Scenes",
+          path: "documentary",
+          documentaryCategory: "behind-scenes",
+        },
+        {
+          link: "Photo Highlights",
+          path: "documentary",
+          documentaryCategory: "photo-highlights",
+        },
+        {
+          link: "Releases & Broadcast",
+          path: "documentary",
+          documentaryCategory: "broadcast",
+        },
       ],
     },
     {
       link: "Archives",
       path: "archives",
-      dropdown: [
-        { link: "Records", path: "records" },
-        { link: "Videos", path: "videos" },
-        { link: "Leadership Hub", path: "leadership-hub" },
-        { link: "Platforms", path: "platforms" },
+      children: [
+        {
+          link: "Overview",
+          path: "archives",
+          archiveCategory: "records",
+        },
+        {
+          link: "Records",
+          path: "archives",
+          archiveCategory: "records",
+        },
+        {
+          link: "Videos",
+          path: "archives",
+          archiveCategory: "videos",
+        },
+        {
+          link: "Leadership Hub",
+          path: "archives",
+          archiveCategory: "leadership-hub",
+        },
+        {
+          link: "Platforms",
+          path: "archives",
+          archiveCategory: "platforms",
+        },
       ],
     },
-    { link: "News", path: "news" },
-    { link: "Contact", path: "contact" },
+    {
+      link: "News",
+      path: "news",
+      children: [
+        { link: "Latest News", path: "news" },
+        { link: "Announcements", path: "announcements" },
+        { link: "Broadcast Updates", path: "broadcast" },
+      ],
+    },
+    {
+      link: "Contact",
+      path: "contact",
+      children: [
+        { link: "Contact Us", path: "contact" },
+        { link: "Enquiries", path: "enquiries" },
+      ],
+    },
   ];
 
   useEffect(() => {
@@ -103,32 +177,62 @@ const Navbar = () => {
     }
   };
 
-  const handleScrollAdjust = (e, path) => {
+  const setGlobalCategoryFromNav = (item) => {
+    if (item?.documentaryCategory && setSelectedDocumentaryCategory) {
+      setSelectedDocumentaryCategory(item.documentaryCategory);
+    }
+
+    if (item?.archiveCategory && setSelectedArchiveCategory) {
+      setSelectedArchiveCategory(item.archiveCategory);
+    }
+  };
+
+  const handleScrollAdjust = (e, itemOrPath) => {
     e.preventDefault();
 
-    setActiveNavItem(path);
+    const item =
+      typeof itemOrPath === "string"
+        ? { path: itemOrPath }
+        : itemOrPath || { path: "home" };
+
+    setActiveNavItem(
+      item.documentaryCategory || item.archiveCategory || item.path
+    );
     setActiveDropdown(null);
     setPinnedDropdown(null);
     setActiveMobileDropdown(null);
+
+    setGlobalCategoryFromNav(item);
 
     if (isMenuOpen) {
       setIsMenuOpen(false);
 
       setTimeout(() => {
-        scrollToSection(path);
+        scrollToSection(item.path);
       }, 320);
 
       return;
     }
 
-    scrollToSection(path);
+    scrollToSection(item.path);
   };
 
   const isItemActive = (item) => {
-    if (activeNavItem === item.path) return true;
+    if (
+      activeNavItem === item.path ||
+      activeNavItem === item.documentaryCategory ||
+      activeNavItem === item.archiveCategory
+    ) {
+      return true;
+    }
 
-    if (Array.isArray(item.dropdown)) {
-      return item.dropdown.some((child) => child.path === activeNavItem);
+    if (Array.isArray(item.children)) {
+      return item.children.some(
+        (child) =>
+          child.path === activeNavItem ||
+          child.documentaryCategory === activeNavItem ||
+          child.archiveCategory === activeNavItem
+      );
     }
 
     return false;
@@ -255,8 +359,9 @@ const Navbar = () => {
                 <span className="font-bold tracking-wide uppercase text-[#F2B705]">
                   The New Dawn
                 </span>
-                <span>Leadership in Action</span>
-                <span>A State in Motion</span>
+                <span className="font-semibold">
+                  Leadership in Action - A State in Motion
+                </span>
               </div>
 
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -316,7 +421,7 @@ const Navbar = () => {
                     The New Dawn
                   </h1>
                   <p className="text-xs md:text-sm text-[#0B7A3E] font-bold italic">
-                    Leadership in Action
+                    Leadership in Action - A State in Motion
                   </p>
                 </div>
               </a>
@@ -326,17 +431,17 @@ const Navbar = () => {
                 aria-label="Primary"
               >
                 {navItems.map((item) => {
-                  const hasDropdown =
-                    Array.isArray(item.dropdown) && item.dropdown.length > 0;
+                  const hasChildren =
+                    Array.isArray(item.children) && item.children.length > 0;
 
                   const active = isItemActive(item);
 
-                  if (!hasDropdown) {
+                  if (!hasChildren) {
                     return (
                       <a
                         key={item.link}
                         href={`#${item.path}`}
-                        onClick={(e) => handleScrollAdjust(e, item.path)}
+                        onClick={(e) => handleScrollAdjust(e, item)}
                         className={`cursor-pointer uppercase tracking-wide transition ${
                           active
                             ? "text-[#F2B705]"
@@ -373,7 +478,9 @@ const Navbar = () => {
                             active || activeDropdown === item.link
                               ? "text-[#F2B705]"
                               : "text-[#0B7A3E]"
-                          } ${activeDropdown === item.link ? "rotate-180" : ""}`}
+                          } ${
+                            activeDropdown === item.link ? "rotate-180" : ""
+                          }`}
                           viewBox="0 0 20 20"
                           fill="currentColor"
                           aria-hidden="true"
@@ -397,34 +504,20 @@ const Navbar = () => {
                         onMouseLeave={() => scheduleCloseDropdown(item.link)}
                       >
                         <ul className="flex flex-col">
-                          <li>
-                            <a
-                              href={`#${item.path}`}
-                              onClick={(e) =>
-                                handleScrollAdjust(e, item.path)
-                              }
-                              className={`block px-5 py-3 text-sm font-bold cursor-pointer transition ${
-                                activeNavItem === item.path
-                                  ? "bg-[#F2B705] text-[#065F2F]"
-                                  : "text-[#065F2F] hover:bg-[#F2B705] hover:text-[#065F2F]"
-                              }`}
-                            >
-                              Overview
-                            </a>
-                          </li>
-
-                          {item.dropdown.map(({ link, path }) => (
-                            <li key={link}>
+                          {item.children.map((child) => (
+                            <li key={child.link}>
                               <a
-                                href={`#${path}`}
-                                onClick={(e) => handleScrollAdjust(e, path)}
+                                href={`#${child.path}`}
+                                onClick={(e) => handleScrollAdjust(e, child)}
                                 className={`block px-5 py-3 text-sm font-semibold cursor-pointer transition ${
-                                  activeNavItem === path
+                                  activeNavItem === child.path ||
+                                  activeNavItem === child.documentaryCategory ||
+                                  activeNavItem === child.archiveCategory
                                     ? "bg-[#F2B705] text-[#065F2F]"
                                     : "text-slate-700 hover:bg-[#F2B705] hover:text-[#065F2F]"
                                 }`}
                               >
-                                {link}
+                                {child.link}
                               </a>
                             </li>
                           ))}
@@ -448,19 +541,27 @@ const Navbar = () => {
             {isMenuOpen && (
               <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-lg z-50 border-t border-[#C9F5DC]">
                 <nav className="flex flex-col py-3 px-4 text-sm font-bold text-[#065F2F]">
+                  <div className="mb-3 rounded-lg bg-[#E9FFF3] border border-[#C9F5DC] px-3 py-2">
+                    <p className="text-xs font-extrabold uppercase tracking-wide text-[#065F2F]">
+                      The New Dawn
+                    </p>
+                    <p className="text-xs text-[#0B7A3E] font-bold italic">
+                      Leadership in Action - A State in Motion
+                    </p>
+                  </div>
+
                   {navItems.map((item) => {
-                    const hasDropdown =
-                      Array.isArray(item.dropdown) &&
-                      item.dropdown.length > 0;
+                    const hasChildren =
+                      Array.isArray(item.children) && item.children.length > 0;
 
                     const active = isItemActive(item);
 
-                    if (!hasDropdown) {
+                    if (!hasChildren) {
                       return (
                         <a
                           key={item.link}
                           href={`#${item.path}`}
-                          onClick={(e) => handleScrollAdjust(e, item.path)}
+                          onClick={(e) => handleScrollAdjust(e, item)}
                           className={`py-3 border-b border-[#E9FFF3] uppercase cursor-pointer transition ${
                             active
                               ? "text-[#F2B705]"
@@ -479,10 +580,7 @@ const Navbar = () => {
                       >
                         <button
                           type="button"
-                          onClick={() => {
-                            toggleMobileDropdown(item.link);
-                            setActiveNavItem(item.path);
-                          }}
+                          onClick={() => toggleMobileDropdown(item.link)}
                           className={`w-full text-left py-3 flex items-center justify-between gap-2 uppercase transition ${
                             active || activeMobileDropdown === item.link
                               ? "text-[#F2B705]"
@@ -516,32 +614,20 @@ const Navbar = () => {
 
                         {activeMobileDropdown === item.link && (
                           <div className="pl-4 pb-3 bg-[#E9FFF3] rounded-lg mb-2">
-                            <a
-                              href={`#${item.path}`}
-                              onClick={(e) =>
-                                handleScrollAdjust(e, item.path)
-                              }
-                              className={`block py-2 text-sm font-bold cursor-pointer transition ${
-                                activeNavItem === item.path
-                                  ? "text-[#F2B705]"
-                                  : "text-[#065F2F] hover:text-[#F2B705]"
-                              }`}
-                            >
-                              Overview
-                            </a>
-
-                            {item.dropdown.map(({ link, path }) => (
+                            {item.children.map((child) => (
                               <a
-                                key={link}
-                                href={`#${path}`}
-                                onClick={(e) => handleScrollAdjust(e, path)}
+                                key={child.link}
+                                href={`#${child.path}`}
+                                onClick={(e) => handleScrollAdjust(e, child)}
                                 className={`block py-2 text-sm cursor-pointer transition ${
-                                  activeNavItem === path
+                                  activeNavItem === child.path ||
+                                  activeNavItem === child.documentaryCategory ||
+                                  activeNavItem === child.archiveCategory
                                     ? "text-[#F2B705] font-bold"
                                     : "text-slate-700 hover:text-[#F2B705]"
                                 }`}
                               >
-                                {link}
+                                {child.link}
                               </a>
                             ))}
                           </div>

@@ -194,8 +194,8 @@ const AboutUs = () => {
             <strong className="text-[#F2B705]">
               Shevet-city Communications
             </strong>{" "}
-            in conjunction with the Niger State Government, created to celebrate
-            the development agenda and progress of Niger State under the
+            in conjunction with the Niger State Government. It was created to
+            showcase the development agenda and progress of Niger State under the
             leadership of{" "}
             <strong className="text-[#065F2F]">
               His Excellency, Farmer Governor Mohammed Umaru Bago.

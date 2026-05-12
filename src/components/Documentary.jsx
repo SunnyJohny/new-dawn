@@ -39,9 +39,12 @@ const Documentary = () => {
     addDocumentary,
     updateDocumentary,
     deleteDocumentary,
+    selectedDocumentaryCategory = "watch-documentary",
+    setSelectedDocumentaryCategory,
   } = useMyContext();
 
-  const [activeCategory, setActiveCategory] = useState("watch-documentary");
+  const activeCategory = selectedDocumentaryCategory || "watch-documentary";
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -102,6 +105,12 @@ const Documentary = () => {
   const closeForm = () => {
     resetForm();
     setShowAddForm(false);
+  };
+
+  const handleVisibleCategoryChange = (value) => {
+    if (setSelectedDocumentaryCategory) {
+      setSelectedDocumentaryCategory(value);
+    }
   };
 
   const handleChange = (e) => {
@@ -425,6 +434,7 @@ const Documentary = () => {
         );
       }
 
+      handleVisibleCategoryChange(formData.category);
       resetForm();
       setShowAddForm(false);
     } catch (error) {
@@ -537,31 +547,24 @@ const Documentary = () => {
           <div className="w-24 h-1 bg-[#F2B705] mx-auto mt-6 rounded-full"></div>
         </div>
 
-        {currentUser ? (
-          <div className="text-center mb-6">
-            <button
-              onClick={() => {
-                if (showAddForm) {
-                  closeForm();
-                } else {
-                  resetForm();
-                  setShowAddForm(true);
-                }
-              }}
-              className="bg-[#065F2F] text-white px-6 py-3 rounded-full inline-flex items-center gap-2 mx-auto font-bold hover:bg-[#0B7A3E] transition shadow-lg"
-            >
-              {showAddForm ? <FaTimes /> : <FaPlus />}
-              {showAddForm ? "Close Form" : "Add Content"}
-            </button>
-          </div>
-        ) : (
-          <div className="bg-white border border-[#C9F5DC] rounded-2xl p-5 text-center shadow-md mb-10 max-w-2xl mx-auto">
-            <p className="text-slate-600">
-              Sign in to upload, edit, or delete documentary videos, photos,
-              clips, releases, or broadcast content.
-            </p>
-          </div>
-        )}
+   {currentUser && (
+  <div className="text-center mb-6">
+    <button
+      onClick={() => {
+        if (showAddForm) {
+          closeForm();
+        } else {
+          resetForm();
+          setShowAddForm(true);
+        }
+      }}
+      className="bg-[#065F2F] text-white px-6 py-3 rounded-full inline-flex items-center gap-2 mx-auto font-bold hover:bg-[#0B7A3E] transition shadow-lg"
+    >
+      {showAddForm ? <FaTimes /> : <FaPlus />}
+      {showAddForm ? "Close Form" : "Add Content"}
+    </button>
+  </div>
+)}
 
         {currentUser && showAddForm && (
           <form
@@ -792,7 +795,7 @@ const Documentary = () => {
 
           <select
             value={activeCategory}
-            onChange={(e) => setActiveCategory(e.target.value)}
+            onChange={(e) => handleVisibleCategoryChange(e.target.value)}
             className="w-full bg-white border border-[#C9F5DC] text-[#065F2F] font-bold rounded-2xl px-5 py-4 shadow-md focus:outline-none focus:ring-2 focus:ring-[#0B7A3E] cursor-pointer"
           >
             {categoryTabs.map((tab) => (
