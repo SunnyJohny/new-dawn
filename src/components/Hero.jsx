@@ -14,6 +14,9 @@ const Hero = () => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const title = "THE NEW DAWN";
+  const subtitle = "Leadership in Action, A State in Motion";
+
   const progressHighlights = [
     "Documenting governance in motion",
     "Public engagement and enlightenment",
@@ -39,23 +42,67 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, [photoHighlights.length]);
 
+  const renderAnimatedLetters = (text, baseDelay = 0) =>
+    text.split("").map((letter, index) => (
+      <span
+        key={`${letter}-${index}`}
+        className="intro-letter inline-block"
+        style={{
+          animationDelay: `${baseDelay + index * 0.07}s`,
+        }}
+      >
+        {letter === " " ? "\u00A0" : letter}
+      </span>
+    ));
+
   return (
     <section
       id="home"
       className="relative w-full min-h-screen pt-[170px] md:pt-[155px] lg:pt-[145px] flex items-center justify-center text-center overflow-hidden"
     >
       <style>{`
-        @keyframes introFadeAway {
-          0% { opacity: 0; transform: translateY(24px) scale(0.98); }
-          12% { opacity: 1; transform: translateY(0) scale(1); }
-          72% { opacity: 1; transform: translateY(0) scale(1); }
-          100% { opacity: 0; transform: translateY(-18px) scale(0.98); visibility: hidden; }
+        @keyframes introLogo {
+          0% { opacity: 0; transform: scale(0.85); }
+          20% { opacity: 1; transform: scale(1); }
+          70% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: scale(0.9); visibility: hidden; }
         }
 
-        @keyframes heroSettleIn {
-          0% { opacity: 0; transform: translateY(20px); }
-          55% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
+        @keyframes letterDropBounce {
+          0% {
+            opacity: 0;
+            transform: translateY(-95px) scale(0.95);
+          }
+          55% {
+            opacity: 1;
+            transform: translateY(12px) scale(1.05);
+          }
+          72% {
+            transform: translateY(-8px) scale(0.98);
+          }
+          88% {
+            transform: translateY(4px) scale(1.01);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes introWriteupDisappear {
+          0% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          80% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(30px);
+            visibility: hidden;
+          }
         }
 
         @keyframes newDawnTicker {
@@ -69,16 +116,21 @@ const Hero = () => {
           100% { opacity: 1; transform: translateY(0); }
         }
 
-        .new-dawn-intro-card {
-          animation: introFadeAway 9s ease-in-out forwards;
+        .intro-logo {
+          animation: introLogo 6s ease-in-out forwards;
         }
 
-        .new-dawn-main-content {
-          animation: heroSettleIn 7.5s ease-out forwards;
+        .intro-writeup {
+          animation: introWriteupDisappear 9.5s ease-in-out forwards;
+        }
+
+        .intro-letter {
+          opacity: 0;
+          animation: letterDropBounce 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         .new-dawn-progress-ribbon {
-          animation: ribbonReveal 8s ease-out forwards;
+          animation: ribbonReveal 7s ease-out forwards;
         }
 
         .new-dawn-ticker-track {
@@ -86,6 +138,7 @@ const Hero = () => {
         }
       `}</style>
 
+      {/* BACKGROUND */}
       <div className="absolute inset-0">
         {photoHighlights.length > 0 ? (
           photoHighlights.map((item, index) => (
@@ -112,55 +165,41 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/55"></div>
       </div>
 
-      <div className="absolute inset-0 z-20 flex items-center justify-center px-6 pointer-events-none">
-        <div className="new-dawn-intro-card max-w-4xl rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md px-6 py-8 md:px-10 md:py-10 shadow-2xl">
-          <p className="text-[#F2B705] text-xs md:text-sm font-extrabold uppercase tracking-[0.35em] mb-4">
-            The New Dawn
-          </p>
-
-          <p className="text-white text-base md:text-xl lg:text-2xl leading-relaxed font-medium">
-            A strategic multimedia programme for public engagement and
-            enlightenment dedicated to the good people of Niger State. The New
-            Dawn captures governance in motion and documents the development
-            trajectory under the leadership of His Excellency, Farmer Governor
-            Mohammed Umaru Bago — ensuring transparency, continuity, and a
-            coherent narrative of progress.
-          </p>
-        </div>
+      {/* LOGO INTRO */}
+      <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+        <img
+          src="/images/New-DawnLogo.png"
+          alt="Intro Logo"
+          className="intro-logo w-32 md:w-48 lg:w-56 object-contain"
+        />
       </div>
 
-      <div className="relative z-10 max-w-3xl px-6 md:px-12 pb-28 md:pb-32 new-dawn-main-content">
-        <div className="flex justify-center mt-6 md:mt-10 mb-5">
-          <div className="bg-white/90 rounded-full p-3 md:p-4 shadow-xl">
-            <img
-              src="/images/New-DawnLogo.png"
-              alt="The New Dawn Logo"
-              className="h-20 w-20 md:h-28 md:w-28 object-contain"
-            />
+      {/* 🔥 BOUNCING WRITE-UP ONLY */}
+      <div className="intro-writeup absolute inset-0 z-20 flex items-end justify-center px-6 pb-44 md:pb-52 pointer-events-none">
+        <div className="max-w-4xl">
+          <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight tracking-wide drop-shadow-lg">
+            {renderAnimatedLetters(title, 1.2)}
+          </h1>
+
+          <p className="text-[#F2B705] text-base md:text-xl font-semibold italic mb-7 drop-shadow-lg">
+            {renderAnimatedLetters(subtitle, 2.3)}
+          </p>
+
+          <div className="flex justify-center">
+            <Link
+              to="about"
+              smooth={true}
+              duration={500}
+              offset={-120}
+              className="border border-[#F2B705] text-[#F2B705] px-8 py-3 rounded-full font-bold cursor-pointer hover:bg-[#F2B705] hover:text-[#065F2F] transition shadow-lg"
+            >
+              Learn More
+            </Link>
           </div>
         </div>
-
-        <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight tracking-wide drop-shadow-lg">
-          THE NEW DAWN
-        </h1>
-
-        <p className="text-[#F2B705] text-base md:text-xl font-semibold italic mb-7">
-          Leadership in Action, A State in Motion
-        </p>
-
-        <div className="flex items-center justify-center">
-          <Link
-            to="about"
-            smooth={true}
-            duration={500}
-            offset={-120}
-            className="border border-[#F2B705] text-[#F2B705] px-8 py-3 rounded-full font-bold cursor-pointer hover:bg-[#F2B705] hover:text-[#065F2F] transition shadow-lg"
-          >
-            Learn More
-          </Link>
-        </div>
       </div>
 
+      {/* PROGRESS RIBBON */}
       <div className="new-dawn-progress-ribbon absolute left-0 right-0 bottom-0 z-30 px-4 pb-5 md:pb-7">
         <div className="max-w-6xl mx-auto overflow-hidden rounded-2xl border border-[#F2B705]/40 bg-white/90 backdrop-blur-md shadow-2xl">
           <div className="flex items-center">

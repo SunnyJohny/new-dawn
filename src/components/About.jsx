@@ -146,9 +146,9 @@ const AboutUs = () => {
   return (
     <section
       id="about"
-      className="min-h-screen bg-[#E9FFF3] text-gray-800 py-20 px-5 md:px-20"
+      className="min-h-screen bg-[#E9FFF3] text-gray-800 py-16 px-4 md:py-20 md:px-20"
     >
-      <div className="mb-14 text-center">
+      <div className="mb-12 md:mb-14 text-center">
         <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-3">
           About The Initiative
         </p>
@@ -166,24 +166,23 @@ const AboutUs = () => {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-10 items-center mb-20">
-        <div className="relative">
-          <img
-            src="/images/New-DawnLogo.png"
-            alt="The New Dawn"
-            className="w-full max-h-[520px] rounded-2xl shadow-xl object-contain bg-[#065F2F] p-8"
-          />
+        <div className="relative mb-8 lg:mb-0">
+          <div className="rounded-2xl shadow-xl bg-[#065F2F] px-4 py-6 sm:px-6 sm:py-8 md:p-10">
+            <img
+              src="/images/New-DawnLogo.png"
+              alt="The New Dawn"
+              className="w-full h-auto max-h-[360px] sm:max-h-[430px] md:max-h-[520px] object-contain"
+            />
+          </div>
 
-          <div className="absolute -bottom-6 left-6 right-6 bg-white shadow-xl rounded-xl p-5 border-l-4 border-[#F2B705]">
-            <p className="text-sm uppercase tracking-wide text-gray-500 font-semibold">
-              Slogan
-            </p>
-            <h3 className="text-xl md:text-2xl font-extrabold text-[#065F2F]">
+          <div className="absolute -bottom-3 left-4 right-4 sm:left-8 sm:right-8 bg-white/95 shadow-md rounded-lg px-3 py-1.5 border-l-4 border-[#F2B705]">
+            <h3 className="text-xs sm:text-sm md:text-base font-extrabold text-[#065F2F] text-center leading-tight">
               Leadership in Action, A State in Motion.
             </h3>
           </div>
         </div>
 
-        <div className="pt-8 lg:pt-0">
+        <div className="pt-6 lg:pt-0">
           <h3 className="text-3xl font-extrabold text-[#065F2F] mb-5">
             Capturing Governance in Motion
           </h3>
