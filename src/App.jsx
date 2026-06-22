@@ -24,7 +24,7 @@ function App() {
         <Hero />
 
         {/* PROGRAMME */}
-        <Programme />
+        {/* <Programme /> */}
 
         {/* DOCUMENTARY */}
         <Documentary />
