@@ -11,16 +11,28 @@ const socialMediaLinks = [
   {
     name: "YouTube",
     icon: <FaYoutube />,
-    url: "https://youtube.com/@james-healpam?si=p_VnmAI5V70FI1kH",
+    url: "https://www.youtube.com/@user-mk4hc2xh3r",
   },
   {
     name: "WhatsApp",
     icon: <FaWhatsapp />,
-    url: "https://wa.me/2349069060610",
+    url: "https://wa.me/2349024715023",
   },
-  { name: "Facebook", icon: <FaFacebook />, url: "#" },
-  { name: "LinkedIn", icon: <FaLinkedin />, url: "#" },
-  { name: "TikTok", icon: <FaTiktok />, url: "#" },
+  {
+    name: "Facebook",
+    icon: <FaFacebook />,
+    url: "#",
+  },
+  {
+    name: "LinkedIn",
+    icon: <FaLinkedin />,
+    url: "#",
+  },
+  {
+    name: "TikTok",
+    icon: <FaTiktok />,
+    url: "#",
+  },
 ];
 
 const quickLinks = [
@@ -91,8 +103,8 @@ const Footer = () => {
             </p>
 
             <div className="space-y-2 text-white/80">
-              <p>Email: info@nigerstate-newdawn.com</p>
-              <p>Phone: +234 906 906 0610</p>
+              <p>Email: nigernewdawn@gmail.com</p>
+              <p>Phone: +234 902 471 5023</p>
               <p>Location: Niger State, Nigeria</p>
               <p>Website: www.nigerstate-newdawn.com</p>
             </div>

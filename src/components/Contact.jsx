@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   FaPhoneAlt,
   FaEnvelope,
@@ -9,28 +9,45 @@ import {
 } from "react-icons/fa";
 import { GoLocation } from "react-icons/go";
 import { MdOutlinePublic } from "react-icons/md";
-import emailjs from "emailjs-com";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { toast } from "react-toastify";
+import { db } from "../firebase";
 
 const Contact = () => {
   const form = useRef();
+  const [sending, setSending] = useState(false);
 
-  const sendEmail = (e) => {
+  const sendMessageToFirestore = async (e) => {
     e.preventDefault();
 
-    emailjs
-      .sendForm(
-        process.env.REACT_APP_EMAILJS_SERVICE_ID,
-        "template_2hgv8sp",
-        form.current,
-        "6UfHuLSCvF132R-1l"
-      )
-      .then(
-        () => toast.success("Message sent successfully"),
-        (error) => toast.error(error.text)
+    const formData = new FormData(form.current);
+
+    const payload = {
+      fullName: formData.get("user_name") || "",
+      email: formData.get("user_email") || "",
+      subject: formData.get("subject") || "",
+      message: formData.get("message") || "",
+      status: "unread",
+      source: "website-contact-form",
+      createdAt: serverTimestamp(),
+    };
+
+    try {
+      setSending(true);
+
+      await addDoc(
+        collection(db, "newDawn", "the-new-dawn", "inbox"),
+        payload
       );
 
-    e.target.reset();
+      toast.success("Message sent successfully");
+      e.target.reset();
+    } catch (error) {
+      console.error("Error sending message to Firestore:", error);
+      toast.error(error.message || "Failed to send message");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -57,7 +74,7 @@ const Contact = () => {
         <div className="flex flex-wrap lg:flex-nowrap gap-8 items-stretch">
           <form
             ref={form}
-            onSubmit={sendEmail}
+            onSubmit={sendMessageToFirestore}
             className="w-full lg:w-1/2 p-6 md:p-8 border border-[#C9F5DC] bg-white shadow-xl rounded-2xl"
           >
             <h3 className="text-2xl font-extrabold text-[#065F2F] mb-6">
@@ -106,9 +123,10 @@ const Contact = () => {
 
             <button
               type="submit"
-              className="w-full bg-[#065F2F] text-white py-3 rounded-lg font-bold hover:bg-[#0B7A3E] transition"
+              disabled={sending}
+              className="w-full bg-[#065F2F] text-white py-3 rounded-lg font-bold hover:bg-[#0B7A3E] transition disabled:opacity-60"
             >
-              Send Message
+              {sending ? "Sending..." : "Send Message"}
             </button>
           </form>
 
@@ -122,7 +140,7 @@ const Contact = () => {
                 <FaPhoneAlt className="text-[#F2B705] mr-4 mt-1" />
                 <div>
                   <p className="font-bold">Phone</p>
-                  <p className="text-white/80">+234 906 906 0610</p>
+                  <p className="text-white/80">+234 902 471 5023</p>
                 </div>
               </div>
 
@@ -130,9 +148,7 @@ const Contact = () => {
                 <FaEnvelope className="text-[#F2B705] mr-4 mt-1" />
                 <div>
                   <p className="font-bold">Email</p>
-                  <p className="text-white/80">
-                    info@nigerstate-newdawn.com
-                  </p>
+                  <p className="text-white/80">nigernewdawn@gmail.com</p>
                 </div>
               </div>
 
@@ -164,7 +180,7 @@ const Contact = () => {
                 <div>
                   <p className="font-bold">WhatsApp</p>
                   <a
-                    href="https://wa.me/2349069060610?text=Hello%20The%20New%20Dawn%20team%2C%20I%20would%20like%20to%20make%20an%20enquiry."
+                    href="https://wa.me/2349024715023?text=Hello%20The%20New%20Dawn%20team%2C%20I%20would%20like%20to%20make%20an%20enquiry."
                     target="_blank"
                     rel="noreferrer"
                     className="text-white/80 hover:text-[#F2B705] transition"
@@ -196,7 +212,9 @@ const Contact = () => {
                 </a>
 
                 <a
-                  href="#"
+                  href="https://www.youtube.com/@user-mk4hc2xh3r"
+                  target="_blank"
+                  rel="noreferrer"
                   aria-label="YouTube"
                   className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-[#F2B705] hover:text-[#065F2F] transition"
                 >

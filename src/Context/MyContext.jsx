@@ -43,9 +43,11 @@ export const MyContextProvider = ({ children }) => {
 
   const [users, setUsers] = useState([]);
   const [documentaries, setDocumentaries] = useState([]);
+  const [archives, setArchives] = useState([]);
+  const [news, setNews] = useState([]);
+  const [inboxMessages, setInboxMessages] = useState([]);
   const [videos, setVideos] = useState([]);
   const [photos, setPhotos] = useState([]);
-  const [archives, setArchives] = useState([]);
   const [records, setRecords] = useState([]);
   const [platforms, setPlatforms] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -79,7 +81,7 @@ export const MyContextProvider = ({ children }) => {
             partner: "Niger State Government",
             description:
               "A strategic multimedia programme for public engagement and enlightenment dedicated to the good people of Niger State.",
-            website: "https://shevet-citymedia.com",
+            website: "https://www.nigerstate-newdawn.com",
             updatedAt: serverTimestamp(),
           },
           { merge: true }
@@ -118,9 +120,11 @@ export const MyContextProvider = ({ children }) => {
     const collectionsToListen = [
       { name: "users", setter: setUsers },
       { name: "documentary", setter: setDocumentaries },
+      { name: "archives", setter: setArchives },
+      { name: "news", setter: setNews },
+      { name: "inbox", setter: setInboxMessages },
       { name: "videos", setter: setVideos },
       { name: "photos", setter: setPhotos },
-      { name: "archives", setter: setArchives },
       { name: "records", setter: setRecords },
       { name: "platforms", setter: setPlatforms },
       { name: "messages", setter: setMessages },
@@ -159,6 +163,14 @@ export const MyContextProvider = ({ children }) => {
   const publishedArchives = useMemo(() => {
     return archives.filter((item) => item.status !== "draft");
   }, [archives]);
+
+  const publishedNews = useMemo(() => {
+    return news.filter((item) => item.status !== "draft");
+  }, [news]);
+
+  const unreadInboxMessages = useMemo(() => {
+    return inboxMessages.filter((item) => item.status === "unread");
+  }, [inboxMessages]);
 
   const documentaryByCategory = useMemo(() => {
     return {
@@ -246,6 +258,33 @@ export const MyContextProvider = ({ children }) => {
 
   const logoutNewDawnUser = async () => {
     await signOut(auth);
+  };
+
+  const markInboxMessageAsRead = async (docId) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to update inbox messages.");
+    }
+
+    if (!docId) {
+      throw new Error("Missing inbox message ID.");
+    }
+
+    await updateDoc(subDocumentRef("inbox", docId), {
+      status: "read",
+      updatedAt: serverTimestamp(),
+    });
+  };
+
+  const deleteInboxMessage = async (docId) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to delete inbox messages.");
+    }
+
+    if (!docId) {
+      throw new Error("Missing inbox message ID.");
+    }
+
+    await deleteDoc(subDocumentRef("inbox", docId));
   };
 
   const addDocumentary = async (data) => {
@@ -394,6 +433,71 @@ export const MyContextProvider = ({ children }) => {
     await deleteDoc(subDocumentRef("archives", docId));
   };
 
+  const addNews = async (data) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to add news.");
+    }
+
+    return await addDoc(subCollectionRef("news"), {
+      title: data.title || "",
+      description: data.description || "",
+      imageUrl: data.imageUrl || "",
+      status: data.status || "published",
+
+      fileName: data.fileName || "",
+      fileType: data.fileType || "",
+      fileSize: data.fileSize || 0,
+      storageProvider: data.storageProvider || "cloudinary",
+
+      createdBy: currentUser?.uid || null,
+      createdByEmail: currentUser?.email || "",
+      createdByName:
+        currentUser?.displayName || currentUser?.email?.split("@")[0] || "",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  };
+
+  const updateNews = async (docId, data) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to update news.");
+    }
+
+    if (!docId) {
+      throw new Error("Missing news document ID.");
+    }
+
+    await updateDoc(subDocumentRef("news", docId), {
+      title: data.title || "",
+      description: data.description || "",
+      imageUrl: data.imageUrl || "",
+      status: data.status || "published",
+
+      fileName: data.fileName || "",
+      fileType: data.fileType || "",
+      fileSize: data.fileSize || 0,
+      storageProvider: data.storageProvider || "cloudinary",
+
+      updatedBy: currentUser?.uid || null,
+      updatedByEmail: currentUser?.email || "",
+      updatedByName:
+        currentUser?.displayName || currentUser?.email?.split("@")[0] || "",
+      updatedAt: serverTimestamp(),
+    });
+  };
+
+  const deleteNews = async (docId) => {
+    if (!currentUser) {
+      throw new Error("You must be signed in to delete news.");
+    }
+
+    if (!docId) {
+      throw new Error("Missing news document ID.");
+    }
+
+    await deleteDoc(subDocumentRef("news", docId));
+  };
+
   const searchByKeyword = (items, keyword) => {
     if (!items || !Array.isArray(items) || typeof keyword !== "string") {
       return [];
@@ -446,6 +550,14 @@ export const MyContextProvider = ({ children }) => {
         publishedArchives,
         archiveByCategory,
 
+        news,
+        publishedNews,
+
+        inboxMessages,
+        unreadInboxMessages,
+        markInboxMessageAsRead,
+        deleteInboxMessage,
+
         videos,
         photos,
         records,
@@ -464,6 +576,10 @@ export const MyContextProvider = ({ children }) => {
         addArchive,
         updateArchive,
         deleteArchive,
+
+        addNews,
+        updateNews,
+        deleteNews,
 
         searchByKeyword,
         capitalizeWords,

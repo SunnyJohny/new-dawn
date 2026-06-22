@@ -44,8 +44,8 @@ const Navbar = () => {
       children: [
         { link: "The Initiative", path: "about" },
         { link: "Programme Framework", path: "programme" },
-        { link: "Vision & Mission", path: "vision-mission" },
-        { link: "Expected Outcome", path: "expected-outcome" },
+        { link: "Vision & Mission", path: "about" },
+        { link: "Expected Outcome", path: "programme" },
       ],
     },
     {
@@ -56,8 +56,8 @@ const Navbar = () => {
         { link: "Documentary & Digital Platforms", path: "media" },
         { link: "Public Engagement", path: "engagement" },
         { link: "Strategic Amplification", path: "amplification" },
-        { link: "Archives", path: "archives-framework" },
-        { link: "Public Accountability", path: "accountability" },
+        { link: "Archives", path: "archives" },
+        { link: "Public Accountability", path: "programme" },
       ],
     },
     {
@@ -132,8 +132,8 @@ const Navbar = () => {
       path: "news",
       children: [
         { link: "Latest News", path: "news" },
-        { link: "Announcements", path: "announcements" },
-        { link: "Broadcast Updates", path: "broadcast" },
+        { link: "Announcements", path: "news" },
+        { link: "Broadcast Updates", path: "documentary" },
       ],
     },
     {
@@ -141,7 +141,8 @@ const Navbar = () => {
       path: "contact",
       children: [
         { link: "Contact Us", path: "contact" },
-        { link: "Enquiries", path: "enquiries" },
+        { link: "Enquiries", path: "contact" },
+        ...(currentUser ? [{ link: "Inbox", path: "inbox" }] : []),
       ],
     },
   ];
@@ -460,38 +461,46 @@ const Navbar = () => {
                       onMouseEnter={() => openDropdownFor(item.link)}
                       onMouseLeave={() => scheduleCloseDropdown(item.link)}
                     >
-                      <button
-                        type="button"
-                        aria-haspopup="true"
-                        aria-expanded={activeDropdown === item.link}
-                        onClick={() => toggleDesktopDropdown(item.link)}
-                        className={`flex items-center gap-2 cursor-pointer uppercase tracking-wide transition ${
-                          active || activeDropdown === item.link
-                            ? "text-[#F2B705]"
-                            : "text-[#065F2F] hover:text-[#F2B705]"
-                        }`}
-                      >
-                        <span>{item.link}</span>
-
-                        <svg
-                          className={`w-3 h-3 transition-transform ${
+                      <div className="flex items-center gap-1">
+                        <a
+                          href={`#${item.path}`}
+                          onClick={(e) => handleScrollAdjust(e, item)}
+                          className={`cursor-pointer uppercase tracking-wide transition ${
                             active || activeDropdown === item.link
                               ? "text-[#F2B705]"
-                              : "text-[#0B7A3E]"
-                          } ${
-                            activeDropdown === item.link ? "rotate-180" : ""
+                              : "text-[#065F2F] hover:text-[#F2B705]"
                           }`}
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          aria-hidden="true"
                         >
-                          <path
-                            fillRule="evenodd"
-                            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
+                          {item.link}
+                        </a>
+
+                        <button
+                          type="button"
+                          aria-haspopup="true"
+                          aria-expanded={activeDropdown === item.link}
+                          onClick={() => toggleDesktopDropdown(item.link)}
+                          className={`transition ${
+                            active || activeDropdown === item.link
+                              ? "text-[#F2B705]"
+                              : "text-[#0B7A3E] hover:text-[#F2B705]"
+                          }`}
+                        >
+                          <svg
+                            className={`w-3 h-3 transition-transform ${
+                              activeDropdown === item.link ? "rotate-180" : ""
+                            }`}
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            aria-hidden="true"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
 
                       <div
                         role="menu"
@@ -578,39 +587,47 @@ const Navbar = () => {
                         key={item.link}
                         className="border-b border-[#E9FFF3]"
                       >
-                        <button
-                          type="button"
-                          onClick={() => toggleMobileDropdown(item.link)}
-                          className={`w-full text-left py-3 flex items-center justify-between gap-2 uppercase transition ${
-                            active || activeMobileDropdown === item.link
-                              ? "text-[#F2B705]"
-                              : "text-[#065F2F] hover:text-[#F2B705]"
-                          }`}
-                          aria-expanded={activeMobileDropdown === item.link}
-                        >
-                          <span>{item.link}</span>
-
-                          <svg
-                            className={`w-3 h-3 transition-transform ${
+                        <div className="flex items-center justify-between gap-2">
+                          <a
+                            href={`#${item.path}`}
+                            onClick={(e) => handleScrollAdjust(e, item)}
+                            className={`flex-1 py-3 uppercase cursor-pointer transition ${
                               active || activeMobileDropdown === item.link
                                 ? "text-[#F2B705]"
-                                : "text-[#0B7A3E]"
-                            } ${
-                              activeMobileDropdown === item.link
-                                ? "rotate-180"
-                                : ""
+                                : "text-[#065F2F] hover:text-[#F2B705]"
                             }`}
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
                           >
-                            <path
-                              fillRule="evenodd"
-                              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </button>
+                            {item.link}
+                          </a>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleMobileDropdown(item.link)}
+                            className={`py-3 px-2 transition ${
+                              active || activeMobileDropdown === item.link
+                                ? "text-[#F2B705]"
+                                : "text-[#0B7A3E] hover:text-[#F2B705]"
+                            }`}
+                            aria-expanded={activeMobileDropdown === item.link}
+                          >
+                            <svg
+                              className={`w-3 h-3 transition-transform ${
+                                activeMobileDropdown === item.link
+                                  ? "rotate-180"
+                                  : ""
+                              }`}
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              aria-hidden="true"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                        </div>
 
                         {activeMobileDropdown === item.link && (
                           <div className="pl-4 pb-3 bg-[#E9FFF3] rounded-lg mb-2">

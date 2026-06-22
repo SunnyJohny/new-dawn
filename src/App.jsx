@@ -4,9 +4,11 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Documentary from "./components/Documentary";
-import Archives from "./components/Archives"; // ✅ ADD THIS
+import Archives from "./components/Archives";
+import News from "./components/News";
 import AboutUs from "./components/About";
 import Contact from "./components/Contact";
+import Inbox from "./components/Inbox";
 import Footer from "./components/Footer";
 import WhatsAppIcon from "./components/watsappComponent";
 
@@ -23,14 +25,20 @@ function App() {
         {/* DOCUMENTARY */}
         <Documentary />
 
-        {/* ✅ ARCHIVES (NEW SECTION ADDED HERE) */}
+        {/* ARCHIVES */}
         <Archives />
+
+        {/* NEWS */}
+        <News />
 
         {/* ABOUT */}
         <AboutUs />
 
         {/* CONTACT */}
         <Contact />
+
+        {/* INBOX */}
+        <Inbox />
 
         {/* FLOATING WHATSAPP */}
         <WhatsAppIcon />

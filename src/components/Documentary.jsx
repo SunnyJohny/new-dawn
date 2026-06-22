@@ -27,6 +27,8 @@ const initialFormData = {
   mediaType: "video",
   mediaUrl: "",
   thumbnailUrl: "",
+  mediaSource: "upload",
+  youtubeUrl: "",
   source: "Cloudinary",
   status: "published",
 };
@@ -91,8 +93,75 @@ const Documentary = () => {
     return categoryTabs.find((tab) => tab.value === category)?.label || category;
   };
 
+  const isYoutubeUrl = (url) => {
+    if (!url) return false;
+
+    return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(
+      url.trim()
+    );
+  };
+
+  const getYoutubeVideoId = (url) => {
+    if (!url) return "";
+
+    try {
+      const cleanUrl = url.trim();
+
+      if (cleanUrl.includes("youtu.be/")) {
+        return cleanUrl.split("youtu.be/")[1]?.split(/[?&/]/)[0] || "";
+      }
+
+      const parsedUrl = new URL(cleanUrl);
+      const videoId = parsedUrl.searchParams.get("v");
+
+      if (videoId) return videoId;
+
+      if (parsedUrl.pathname.includes("/embed/")) {
+        return parsedUrl.pathname.split("/embed/")[1]?.split(/[?&/]/)[0] || "";
+      }
+
+      if (parsedUrl.pathname.includes("/shorts/")) {
+        return parsedUrl.pathname.split("/shorts/")[1]?.split(/[?&/]/)[0] || "";
+      }
+
+      return "";
+    } catch {
+      return "";
+    }
+  };
+
+  const getYoutubeEmbedUrl = (url) => {
+    const videoId = getYoutubeVideoId(url);
+
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
+  };
+
+  const getYoutubeThumbnail = (url) => {
+    const videoId = getYoutubeVideoId(url);
+
+    return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : "";
+  };
+
+  const isYoutubeVideo = (item) => {
+    return item.mediaType === "video" && item.mediaSource === "youtube";
+  };
+
+  const openYoutubeVideo = (item) => {
+    const url = item.youtubeUrl || item.mediaUrl;
+
+    if (!url) {
+      toast.error("YouTube link is missing.");
+      return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const isTextBroadcast =
     formData.category === "broadcast" && formData.mediaType === "text";
+
+  const isYoutubeFormVideo =
+    formData.mediaType === "video" && formData.mediaSource === "youtube";
 
   const resetForm = () => {
     setFormData(initialFormData);
@@ -130,6 +199,36 @@ const Documentary = () => {
           ...prev,
           category: value,
           mediaType: "video",
+          mediaSource: "upload",
+          youtubeUrl: "",
+        };
+      }
+
+      if (name === "mediaType" && value !== "video") {
+        return {
+          ...prev,
+          mediaType: value,
+          mediaSource: "upload",
+          youtubeUrl: "",
+        };
+      }
+
+      if (name === "mediaSource" && value === "youtube") {
+        setMediaFile(null);
+
+        return {
+          ...prev,
+          mediaSource: value,
+          mediaType: "video",
+          mediaUrl: "",
+        };
+      }
+
+      if (name === "mediaSource" && value === "upload") {
+        return {
+          ...prev,
+          mediaSource: value,
+          youtubeUrl: "",
         };
       }
 
@@ -189,6 +288,7 @@ const Documentary = () => {
         setFormData((prev) => ({
           ...prev,
           mediaType: "video",
+          mediaSource: "upload",
         }));
       };
 
@@ -207,6 +307,8 @@ const Documentary = () => {
     setFormData((prev) => ({
       ...prev,
       mediaType: "photo",
+      mediaSource: "upload",
+      youtubeUrl: "",
     }));
   };
 
@@ -324,6 +426,8 @@ const Documentary = () => {
       mediaType: item.mediaType || "video",
       mediaUrl: item.mediaUrl || "",
       thumbnailUrl: item.thumbnailUrl || "",
+      mediaSource: item.mediaSource || "upload",
+      youtubeUrl: item.youtubeUrl || "",
       source: item.source || "Cloudinary",
       status: item.status || "published",
     });
@@ -381,7 +485,17 @@ const Documentary = () => {
       return;
     }
 
-    if (!editingItem && !mediaFile && !isTextBroadcast) {
+    if (isYoutubeFormVideo && !formData.youtubeUrl.trim()) {
+      toast.error("Please paste the YouTube video link.");
+      return;
+    }
+
+    if (isYoutubeFormVideo && !isYoutubeUrl(formData.youtubeUrl)) {
+      toast.error("Please enter a valid YouTube link.");
+      return;
+    }
+
+    if (!editingItem && !mediaFile && !isTextBroadcast && !isYoutubeFormVideo) {
       toast.error("Please select a file from your device.");
       return;
     }
@@ -393,28 +507,48 @@ const Documentary = () => {
       let mediaUrl = formData.mediaUrl;
       let thumbnailUrl = formData.thumbnailUrl;
 
-      if (mediaFile && !isTextBroadcast) {
+      if (mediaFile && !isTextBroadcast && !isYoutubeFormVideo) {
         mediaUrl = await uploadToCloudinary(mediaFile, "documentary");
       }
 
-      if (thumbnailFile && formData.mediaType !== "photo" && !isTextBroadcast) {
+      if (
+        thumbnailFile &&
+        formData.mediaType !== "photo" &&
+        !isTextBroadcast &&
+        !isYoutubeFormVideo
+      ) {
         thumbnailUrl = await uploadToCloudinary(thumbnailFile, "thumbnails");
+      }
+
+      if (isYoutubeFormVideo) {
+        mediaUrl = formData.youtubeUrl.trim();
+        thumbnailUrl = thumbnailUrl || getYoutubeThumbnail(formData.youtubeUrl);
       }
 
       const payload = {
         ...formData,
         mediaUrl: isTextBroadcast ? "" : mediaUrl,
         thumbnailUrl: isTextBroadcast ? "" : thumbnailUrl,
-        fileName: isTextBroadcast
-          ? ""
-          : mediaFile?.name || editingItem?.fileName || "",
+        youtubeUrl: isYoutubeFormVideo ? formData.youtubeUrl.trim() : "",
+        mediaSource: isYoutubeFormVideo ? "youtube" : "upload",
+        fileName:
+          isTextBroadcast || isYoutubeFormVideo
+            ? ""
+            : mediaFile?.name || editingItem?.fileName || "",
         fileType: isTextBroadcast
           ? "text/plain"
+          : isYoutubeFormVideo
+          ? "youtube/link"
           : mediaFile?.type || editingItem?.fileType || "",
-        fileSize: isTextBroadcast
-          ? 0
-          : mediaFile?.size || editingItem?.fileSize || "",
-        storageProvider: isTextBroadcast ? "firestore-text" : "cloudinary",
+        fileSize:
+          isTextBroadcast || isYoutubeFormVideo
+            ? 0
+            : mediaFile?.size || editingItem?.fileSize || "",
+        storageProvider: isTextBroadcast
+          ? "firestore-text"
+          : isYoutubeFormVideo
+          ? "youtube"
+          : "cloudinary",
       };
 
       if (editingItem) {
@@ -430,6 +564,8 @@ const Documentary = () => {
         toast.success(
           isTextBroadcast
             ? "Broadcast text saved successfully."
+            : isYoutubeFormVideo
+            ? "YouTube video link saved successfully."
             : "Documentary content uploaded successfully."
         );
       }
@@ -481,6 +617,37 @@ const Documentary = () => {
           alt={item.title}
           className="w-full h-64 object-cover rounded-xl"
         />
+      );
+    }
+
+    if (isYoutubeVideo(item)) {
+      return (
+        <button
+          type="button"
+          onClick={() => openYoutubeVideo(item)}
+          className="relative w-full h-64 rounded-xl overflow-hidden bg-black group"
+        >
+          <img
+            src={
+              item.thumbnailUrl ||
+              getYoutubeThumbnail(item.youtubeUrl || item.mediaUrl)
+            }
+            alt={item.title}
+            className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition duration-500"
+          />
+
+          <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+            <span className="h-20 w-20 rounded-full bg-white/95 text-[#065F2F] flex items-center justify-center shadow-2xl group-hover:scale-110 transition">
+              <FaPlayCircle className="text-5xl" />
+            </span>
+          </div>
+
+          <div className="absolute bottom-4 left-4 right-4 text-left">
+            <p className="text-white text-sm font-bold drop-shadow">
+              Tap to watch on YouTube
+            </p>
+          </div>
+        </button>
       );
     }
 
@@ -547,24 +714,25 @@ const Documentary = () => {
           <div className="w-24 h-1 bg-[#F2B705] mx-auto mt-6 rounded-full"></div>
         </div>
 
-   {currentUser && (
-  <div className="text-center mb-6">
-    <button
-      onClick={() => {
-        if (showAddForm) {
-          closeForm();
-        } else {
-          resetForm();
-          setShowAddForm(true);
-        }
-      }}
-      className="bg-[#065F2F] text-white px-6 py-3 rounded-full inline-flex items-center gap-2 mx-auto font-bold hover:bg-[#0B7A3E] transition shadow-lg"
-    >
-      {showAddForm ? <FaTimes /> : <FaPlus />}
-      {showAddForm ? "Close Form" : "Add Content"}
-    </button>
-  </div>
-)}
+        {currentUser && (
+          <div className="text-center mb-6">
+            <button
+              onClick={() => {
+                if (showAddForm) {
+                  closeForm();
+                } else {
+                  resetForm();
+                  setShowAddForm(true);
+                }
+              }}
+              className="bg-[#065F2F] text-white px-6 py-3 rounded-full inline-flex items-center gap-2 mx-auto font-bold hover:bg-[#0B7A3E] transition shadow-lg"
+              type="button"
+            >
+              {showAddForm ? <FaTimes /> : <FaPlus />}
+              {showAddForm ? "Close Form" : "Add Content"}
+            </button>
+          </div>
+        )}
 
         {currentUser && showAddForm && (
           <form
@@ -643,7 +811,48 @@ const Documentary = () => {
                 </select>
               </div>
 
-              {!isTextBroadcast && (
+              {formData.mediaType === "video" && !isTextBroadcast && (
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    Video Source
+                  </label>
+                  <select
+                    name="mediaSource"
+                    value={formData.mediaSource}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
+                  >
+                    <option value="upload">Upload Short Video</option>
+                    <option value="youtube">YouTube Link For Long Video</option>
+                  </select>
+                  <p className="text-xs text-slate-500 mt-2">
+                    Use YouTube links for long videos to avoid storing large
+                    files.
+                  </p>
+                </div>
+              )}
+
+              {isYoutubeFormVideo && (
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                    YouTube Video Link *
+                  </label>
+                  <input
+                    type="url"
+                    name="youtubeUrl"
+                    value={formData.youtubeUrl}
+                    onChange={handleChange}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full p-3 border border-[#C9F5DC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
+                    required={isYoutubeFormVideo}
+                  />
+                  <p className="text-xs text-slate-500 mt-2">
+                    Paste the full YouTube video link here.
+                  </p>
+                </div>
+              )}
+
+              {!isTextBroadcast && !isYoutubeFormVideo && (
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">
                     {editingItem
@@ -680,28 +889,30 @@ const Documentary = () => {
                 </div>
               )}
 
-              {!isTextBroadcast && formData.mediaType !== "photo" && (
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Optional Video Thumbnail
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleThumbnailFileChange}
-                    className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
-                  />
+              {!isTextBroadcast &&
+                !isYoutubeFormVideo &&
+                formData.mediaType !== "photo" && (
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                      Optional Video Thumbnail
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleThumbnailFileChange}
+                      className="w-full p-3 border border-[#C9F5DC] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
+                    />
 
-                  {thumbnailFile && (
-                    <p className="text-sm text-slate-500 mt-2">
-                      Thumbnail:{" "}
-                      <span className="font-semibold text-[#065F2F]">
-                        {thumbnailFile.name}
-                      </span>
-                    </p>
-                  )}
-                </div>
-              )}
+                    {thumbnailFile && (
+                      <p className="text-sm text-slate-500 mt-2">
+                        Thumbnail:{" "}
+                        <span className="font-semibold text-[#065F2F]">
+                          {thumbnailFile.name}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                )}
 
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -754,7 +965,7 @@ const Documentary = () => {
               </div>
             </div>
 
-            {submitting && !isTextBroadcast && (
+            {submitting && !isTextBroadcast && !isYoutubeFormVideo && (
               <div className="mt-6">
                 <div className="w-full bg-[#E9FFF3] rounded-full h-3 overflow-hidden">
                   <div
@@ -778,11 +989,15 @@ const Documentary = () => {
                   ? "Updating..."
                   : isTextBroadcast
                   ? "Saving..."
+                  : isYoutubeFormVideo
+                  ? "Saving Link..."
                   : "Uploading..."
                 : editingItem
                 ? "Update Content"
                 : isTextBroadcast
                 ? "Save Broadcast Text"
+                : isYoutubeFormVideo
+                ? "Save YouTube Link"
                 : "Upload & Save Content"}
             </button>
           </form>
@@ -847,6 +1062,10 @@ const Documentary = () => {
                     ) : item.category === "broadcast" ? (
                       <span className="inline-flex items-center gap-1">
                         <FaBroadcastTower /> Broadcast
+                      </span>
+                    ) : isYoutubeVideo(item) ? (
+                      <span className="inline-flex items-center gap-1">
+                        <FaPlayCircle /> YouTube
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1">
@@ -921,11 +1140,17 @@ const Documentary = () => {
                   {item.mediaType === "video" && (
                     <button
                       type="button"
-                      onClick={() => setPlayingVideo(item)}
+                      onClick={() => {
+                        if (isYoutubeVideo(item)) {
+                          openYoutubeVideo(item);
+                        } else {
+                          setPlayingVideo(item);
+                        }
+                      }}
                       className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
                     >
                       <FaPlayCircle />
-                      Play video
+                      {isYoutubeVideo(item) ? "Watch on YouTube" : "Play video"}
                     </button>
                   )}
 
