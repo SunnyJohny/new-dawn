@@ -25,6 +25,7 @@ const Contact = () => {
     const payload = {
       fullName: formData.get("user_name") || "",
       email: formData.get("user_email") || "",
+      phoneNumber: formData.get("phone_number") || "",
       subject: formData.get("subject") || "",
       message: formData.get("message") || "",
       status: "unread",
@@ -97,6 +98,17 @@ const Contact = () => {
             <input
               type="email"
               name="user_email"
+              className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
+              required
+            />
+
+            <label className="block text-sm font-bold mb-2 text-gray-700">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              name="phone_number"
+              placeholder="Example: +234 801 234 5678"
               className="w-full p-3 border border-[#C9F5DC] rounded-lg mb-5 focus:outline-none focus:ring-2 focus:ring-[#0B7A3E]"
               required
             />

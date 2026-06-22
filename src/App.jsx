@@ -3,6 +3,7 @@ import "./App.css";
 
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import Programme from "./components/Programme";
 import Documentary from "./components/Documentary";
 import Archives from "./components/Archives";
 import News from "./components/News";
@@ -22,6 +23,9 @@ function App() {
         {/* HERO */}
         <Hero />
 
+        {/* PROGRAMME */}
+        <Programme />
+
         {/* DOCUMENTARY */}
         <Documentary />
 
@@ -37,7 +41,7 @@ function App() {
         {/* CONTACT */}
         <Contact />
 
-        {/* INBOX */}
+        {/* ADMIN INBOX */}
         <Inbox />
 
         {/* FLOATING WHATSAPP */}

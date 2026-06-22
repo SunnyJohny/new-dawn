@@ -32,6 +32,8 @@ const initialFormData = {
   status: "published",
 };
 
+const VIEW_MORE_ROWS = 3;
+
 const Archives = () => {
   const {
     currentUser,
@@ -52,8 +54,10 @@ const Archives = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [editingItem, setEditingItem] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null);
+  const [previewItem, setPreviewItem] = useState(null);
   const [playingVideo, setPlayingVideo] = useState(null);
-  const [showAllCards, setShowAllCards] = useState(false);
+  const [cardsPerRow, setCardsPerRow] = useState(3);
+  const [visibleCount, setVisibleCount] = useState(3);
 
   const [mediaFile, setMediaFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
@@ -65,6 +69,20 @@ const Archives = () => {
     }
   }, [setSelectedArchiveCategory]);
 
+  useEffect(() => {
+    const updateCardsPerRow = () => {
+      const count = window.innerWidth >= 1024 ? 3 : 2;
+
+      setCardsPerRow(count);
+      setVisibleCount(count);
+    };
+
+    updateCardsPerRow();
+    window.addEventListener("resize", updateCardsPerRow);
+
+    return () => window.removeEventListener("resize", updateCardsPerRow);
+  }, []);
+
   const signedInItems = archives.length > 0 ? archives : publishedArchives;
   const visibleItems = currentUser ? signedInItems : publishedArchives;
 
@@ -75,8 +93,13 @@ const Archives = () => {
           (item) => (item.category || "records") === activeCategory
         );
 
-  const displayedItems = showAllCards ? filteredItems : filteredItems.slice(0, 6);
-  const hasMoreCards = filteredItems.length > 6 && !showAllCards;
+  const displayedItems = filteredItems.slice(
+    0,
+    Math.min(visibleCount, filteredItems.length)
+  );
+
+  const hasCardsToToggle = filteredItems.length > cardsPerRow;
+  const hasMoreCards = visibleCount < filteredItems.length;
 
   const isTextArchive = formData.mediaType === "text";
 
@@ -121,10 +144,32 @@ const Archives = () => {
   };
 
   const handleVisibleCategoryChange = (value) => {
-    setShowAllCards(false);
+    setVisibleCount(cardsPerRow);
 
     if (setSelectedArchiveCategory) {
       setSelectedArchiveCategory(value);
+    }
+  };
+
+  const handleViewMore = () => {
+    setVisibleCount((prev) =>
+      Math.min(prev + cardsPerRow * VIEW_MORE_ROWS, filteredItems.length)
+    );
+  };
+
+  const handleShowLess = () => {
+    setVisibleCount(cardsPerRow);
+
+    const target = document.getElementById("archives");
+
+    if (target) {
+      const offset = 120;
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+
+      window.scrollTo({
+        top,
+        behavior: "smooth",
+      });
     }
   };
 
@@ -459,30 +504,37 @@ const Archives = () => {
     }
   };
 
+  const openCardPreview = (item) => {
+    setPreviewItem(item);
+  };
+
   const renderMedia = (item) => {
     if (item.mediaType === "text") {
       return (
         <button
           type="button"
-          onClick={() => setExpandedItem(item)}
-          className="w-full h-64 bg-gradient-to-br from-[#065F2F] to-[#0B7A3E] text-left p-6 rounded-xl flex flex-col justify-between hover:scale-[1.01] transition"
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpandedItem(item);
+          }}
+          className="w-full h-40 sm:h-48 md:h-64 bg-gradient-to-br from-[#065F2F] to-[#0B7A3E] text-left p-3 sm:p-4 md:p-6 rounded-xl flex flex-col justify-between hover:scale-[1.01] transition"
         >
           <div>
-            <FaArchive className="text-[#F2B705] text-4xl mb-4" />
-            <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-[#F2B705] mb-3">
+            <FaArchive className="text-[#F2B705] text-2xl sm:text-3xl md:text-4xl mb-2 md:mb-4" />
+            <p className="text-[9px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#F2B705] mb-2 md:mb-3">
               Archive Record
             </p>
-            <h4 className="text-white text-2xl font-extrabold leading-tight">
+            <h4 className="text-white text-sm sm:text-lg md:text-2xl font-extrabold leading-tight line-clamp-2">
               {item.title}
             </h4>
           </div>
 
-          <p className="text-white/90 text-sm line-clamp-3">
+          <p className="text-white/90 text-[11px] sm:text-sm line-clamp-2 md:line-clamp-3">
             {item.description || "Click to read full archive."}
           </p>
 
-          <span className="text-[#F2B705] text-sm font-bold">
-            Click to read full archive →
+          <span className="text-[#F2B705] text-[11px] sm:text-sm font-bold">
+            Read →
           </span>
         </button>
       );
@@ -493,7 +545,7 @@ const Archives = () => {
         <img
           src={item.mediaUrl}
           alt={item.title}
-          className="w-full h-64 object-cover rounded-xl"
+          className="w-full h-40 sm:h-48 md:h-64 object-cover rounded-xl"
         />
       );
     }
@@ -501,8 +553,11 @@ const Archives = () => {
     return (
       <button
         type="button"
-        onClick={() => setPlayingVideo(item)}
-        className="relative w-full h-64 rounded-xl overflow-hidden bg-black group"
+        onClick={(e) => {
+          e.stopPropagation();
+          setPlayingVideo(item);
+        }}
+        className="relative w-full h-40 sm:h-48 md:h-64 rounded-xl overflow-hidden bg-black group"
       >
         <video
           src={item.mediaUrl}
@@ -514,22 +569,76 @@ const Archives = () => {
         />
 
         <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-          <span className="h-20 w-20 rounded-full bg-white/95 text-[#065F2F] flex items-center justify-center shadow-2xl group-hover:scale-110 transition">
-            <FaPlayCircle className="text-5xl" />
+          <span className="h-12 w-12 sm:h-14 sm:w-14 md:h-20 md:w-20 rounded-full bg-white/95 text-[#065F2F] flex items-center justify-center shadow-2xl group-hover:scale-110 transition">
+            <FaPlayCircle className="text-3xl sm:text-4xl md:text-5xl" />
           </span>
         </div>
 
-        <div className="absolute bottom-4 left-4 right-4 text-left">
-          <p className="text-white text-sm font-bold drop-shadow">
-            Tap to play video
+        <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 text-left">
+          <p className="text-white text-[10px] sm:text-sm font-bold drop-shadow">
+            Tap to play
           </p>
         </div>
       </button>
     );
   };
 
+  const renderPreviewMedia = (item) => {
+    if (!item) return null;
+
+    if (item.mediaType === "text") {
+      return (
+        <div className="w-full bg-gradient-to-br from-[#065F2F] to-[#0B7A3E] p-6 md:p-10 rounded-2xl">
+          <FaArchive className="text-[#F2B705] text-5xl mb-4" />
+          <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-[#F2B705] mb-3">
+            Archive Record
+          </p>
+          <h4 className="text-white text-3xl md:text-4xl font-extrabold leading-tight">
+            {item.title}
+          </h4>
+        </div>
+      );
+    }
+
+    if (item.mediaType === "photo") {
+      return (
+        <img
+          src={item.mediaUrl}
+          alt={item.title}
+          className="w-full max-h-[65vh] object-cover rounded-2xl"
+        />
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setPreviewItem(null);
+          setPlayingVideo(item);
+        }}
+        className="relative w-full max-h-[65vh] rounded-2xl overflow-hidden bg-black group"
+      >
+        <video
+          src={item.mediaUrl}
+          poster={item.thumbnailUrl || getCloudinaryVideoThumbnail(item.mediaUrl)}
+          muted
+          playsInline
+          preload="metadata"
+          className="w-full max-h-[65vh] object-cover opacity-85 group-hover:scale-105 transition duration-500"
+        />
+
+        <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+          <span className="h-24 w-24 rounded-full bg-white/95 text-[#065F2F] flex items-center justify-center shadow-2xl group-hover:scale-110 transition">
+            <FaPlayCircle className="text-6xl" />
+          </span>
+        </div>
+      </button>
+    );
+  };
+
   return (
-    <section id="archives" className="bg-[#E9FFF3] py-20 px-5 md:px-20">
+    <section id="archives" className="bg-[#E9FFF3] py-20 px-3 sm:px-5 md:px-20">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-3">
@@ -836,16 +945,17 @@ const Archives = () => {
           </div>
         ) : (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {displayedItems.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white border border-[#C9F5DC] rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition"
+                  onClick={() => openCardPreview(item)}
+                  className="bg-white border border-[#C9F5DC] rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition cursor-pointer"
                 >
                   <div className="relative overflow-hidden rounded-xl">
                     {renderMedia(item)}
 
-                    <div className="absolute top-4 left-4 z-30 bg-[#065F2F] text-white text-xs font-bold px-3 py-1 rounded-full pointer-events-none">
+                    <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-30 bg-[#065F2F] text-white text-[9px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full pointer-events-none">
                       {item.mediaType === "text" ? (
                         <span className="inline-flex items-center gap-1">
                           <FaFileAlt /> Text
@@ -862,10 +972,13 @@ const Archives = () => {
                     </div>
 
                     {!!currentUser && item?.id && (
-                      <div className="absolute top-4 right-4 z-40 flex gap-2">
+                      <div
+                        className="absolute top-2 sm:top-4 right-2 sm:right-4 z-40 flex gap-1 sm:gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <button
                           onClick={() => handleEdit(item)}
-                          className="bg-white text-[#065F2F] h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition"
+                          className="bg-white text-[#065F2F] h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition text-xs sm:text-base"
                           type="button"
                           title="Edit"
                         >
@@ -875,7 +988,7 @@ const Archives = () => {
                         <button
                           onClick={() => handleDelete(item)}
                           disabled={deletingId === item.id}
-                          className="bg-white text-red-600 h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition disabled:opacity-60"
+                          className="bg-white text-red-600 h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition disabled:opacity-60 text-xs sm:text-base"
                           type="button"
                           title="Delete"
                         >
@@ -885,15 +998,15 @@ const Archives = () => {
                     )}
                   </div>
 
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <p className="text-xs uppercase tracking-widest text-[#F2B705] font-bold">
+                  <div className="p-3 sm:p-4">
+                    <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2">
+                      <p className="text-[9px] sm:text-xs uppercase tracking-widest text-[#F2B705] font-bold line-clamp-1">
                         {getCategoryTitle(item.category)}
                       </p>
 
                       {currentUser && (
                         <span
-                          className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
+                          className={`hidden sm:inline-block text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
                             item.status === "published"
                               ? "bg-[#E9FFF3] text-[#065F2F] border border-[#C9F5DC]"
                               : "bg-yellow-50 text-yellow-700 border border-yellow-200"
@@ -904,12 +1017,12 @@ const Archives = () => {
                       )}
                     </div>
 
-                    <h4 className="font-bold text-lg text-[#065F2F]">
+                    <h4 className="font-bold text-sm sm:text-lg text-[#065F2F] line-clamp-2">
                       {item.title}
                     </h4>
 
                     {item.description && item.mediaType !== "text" && (
-                      <p className="text-sm text-slate-500 mt-2">
+                      <p className="hidden sm:block text-sm text-slate-500 mt-2 line-clamp-2">
                         {item.description}
                       </p>
                     )}
@@ -917,8 +1030,11 @@ const Archives = () => {
                     {item.mediaType === "text" && (
                       <button
                         type="button"
-                        onClick={() => setExpandedItem(item)}
-                        className="mt-3 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedItem(item);
+                        }}
+                        className="mt-2 sm:mt-3 text-[11px] sm:text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
                       >
                         Read full archive
                       </button>
@@ -927,27 +1043,30 @@ const Archives = () => {
                     {item.mediaType === "video" && (
                       <button
                         type="button"
-                        onClick={() => setPlayingVideo(item)}
-                        className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPlayingVideo(item);
+                        }}
+                        className="mt-2 sm:mt-3 inline-flex items-center gap-1 sm:gap-2 text-[11px] sm:text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
                       >
                         <FaPlayCircle />
-                        Play video
+                        Play
                       </button>
                     )}
 
                     {item.source && (
-                      <p className="text-xs text-slate-400 mt-3">
+                      <p className="hidden sm:block text-xs text-slate-400 mt-3">
                         Source: {item.source}
                       </p>
                     )}
 
                     {item.createdByName && (
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="hidden sm:block text-xs text-slate-400 mt-1">
                         Added by: {item.createdByName}
                       </p>
                     )}
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="hidden sm:block text-xs text-slate-400 mt-1">
                       Added on: {formatAddedTime(item.createdAt)}
                     </p>
                   </div>
@@ -955,20 +1074,90 @@ const Archives = () => {
               ))}
             </div>
 
-            {hasMoreCards && (
+            {hasCardsToToggle && (
               <div className="text-center mt-10">
                 <button
                   type="button"
-                  onClick={() => setShowAllCards(true)}
+                  onClick={hasMoreCards ? handleViewMore : handleShowLess}
                   className="bg-[#065F2F] text-white px-8 py-3 rounded-full font-bold hover:bg-[#0B7A3E] transition shadow-lg"
                 >
-                  View More
+                  {hasMoreCards ? "View More" : "Show Less"}
                 </button>
               </div>
             )}
           </>
         )}
       </div>
+
+      {previewItem && (
+        <div className="fixed inset-0 z-[999] bg-black/75 px-4 py-8 flex items-center justify-center">
+          <div className="bg-white w-full max-w-5xl max-h-[92vh] overflow-y-auto rounded-3xl shadow-2xl border border-[#C9F5DC]">
+            <div className="sticky top-0 bg-white border-b border-[#C9F5DC] p-5 flex items-start justify-between gap-4 rounded-t-3xl z-10">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-[#F2B705] mb-2">
+                  {getCategoryTitle(previewItem.category)}
+                </p>
+                <h3 className="text-2xl md:text-4xl font-extrabold text-[#065F2F]">
+                  {previewItem.title}
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setPreviewItem(null)}
+                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="p-5 md:p-8">
+              {renderPreviewMedia(previewItem)}
+
+              {previewItem.description && (
+                <p className="text-slate-700 text-base md:text-lg leading-8 whitespace-pre-line mt-6">
+                  {previewItem.description}
+                </p>
+              )}
+
+              <div className="mt-6 pt-5 border-t border-[#C9F5DC] text-xs text-slate-400 space-y-1">
+                {previewItem.source && <p>Source: {previewItem.source}</p>}
+                {previewItem.createdByName && (
+                  <p>Added by: {previewItem.createdByName}</p>
+                )}
+                <p>Added on: {formatAddedTime(previewItem.createdAt)}</p>
+              </div>
+
+              {previewItem.mediaType === "text" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreviewItem(null);
+                    setExpandedItem(previewItem);
+                  }}
+                  className="mt-6 bg-[#065F2F] text-white px-6 py-3 rounded-full font-bold hover:bg-[#0B7A3E] transition shadow-lg"
+                >
+                  Read Full Archive
+                </button>
+              )}
+
+              {previewItem.mediaType === "video" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreviewItem(null);
+                    setPlayingVideo(previewItem);
+                  }}
+                  className="mt-6 bg-[#065F2F] text-white px-6 py-3 rounded-full font-bold hover:bg-[#0B7A3E] transition shadow-lg inline-flex items-center gap-2"
+                >
+                  <FaPlayCircle />
+                  Play Video
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {playingVideo && (
         <div className="fixed inset-0 z-[1000] bg-black/85 px-4 py-8 flex items-center justify-center">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaPlus, FaEdit, FaTrash, FaTimes, FaImage } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useMyContext } from "../Context/MyContext";
@@ -9,6 +9,8 @@ const initialFormData = {
   imageUrl: "",
   status: "published",
 };
+
+const VIEW_MORE_ROWS = 3;
 
 const News = () => {
   const {
@@ -27,10 +29,35 @@ const News = () => {
   const [imageFile, setImageFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [expandedItem, setExpandedItem] = useState(null);
+  const [previewItem, setPreviewItem] = useState(null);
+  const [cardsPerRow, setCardsPerRow] = useState(3);
+  const [visibleCount, setVisibleCount] = useState(3);
   const [formData, setFormData] = useState(initialFormData);
+
+  useEffect(() => {
+    const updateCardsPerRow = () => {
+      const count = window.innerWidth >= 1024 ? 3 : 2;
+
+      setCardsPerRow(count);
+      setVisibleCount(count);
+    };
+
+    updateCardsPerRow();
+    window.addEventListener("resize", updateCardsPerRow);
+
+    return () => window.removeEventListener("resize", updateCardsPerRow);
+  }, []);
 
   const signedInItems = news.length > 0 ? news : publishedNews;
   const visibleItems = currentUser ? signedInItems : publishedNews;
+
+  const displayedItems = visibleItems.slice(
+    0,
+    Math.min(visibleCount, visibleItems.length)
+  );
+
+  const hasCardsToToggle = visibleItems.length > cardsPerRow;
+  const hasMoreCards = visibleCount < visibleItems.length;
 
   const formatAddedTime = (createdAt) => {
     if (!createdAt) return "Just now";
@@ -63,6 +90,28 @@ const News = () => {
   const closeForm = () => {
     resetForm();
     setShowAddForm(false);
+  };
+
+  const handleViewMore = () => {
+    setVisibleCount((prev) =>
+      Math.min(prev + cardsPerRow * VIEW_MORE_ROWS, visibleItems.length)
+    );
+  };
+
+  const handleShowLess = () => {
+    setVisibleCount(cardsPerRow);
+
+    const target = document.getElementById("news");
+
+    if (target) {
+      const offset = 120;
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+
+      window.scrollTo({
+        top,
+        behavior: "smooth",
+      });
+    }
   };
 
   const handleChange = (e) => {
@@ -257,6 +306,7 @@ const News = () => {
 
       resetForm();
       setShowAddForm(false);
+      setVisibleCount(cardsPerRow);
     } catch (error) {
       console.error("Error saving news:", error);
       toast.error(error.message || "Failed to save news.");
@@ -265,8 +315,12 @@ const News = () => {
     }
   };
 
+  const openCardPreview = (item) => {
+    setPreviewItem(item);
+  };
+
   return (
-    <section id="news" className="bg-white py-20 px-5 md:px-20">
+    <section id="news" className="bg-white py-20 px-3 sm:px-5 md:px-20">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#F2B705] mb-3">
@@ -451,93 +505,179 @@ const News = () => {
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visibleItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white border border-[#C9F5DC] rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition"
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.title}
-                    className="w-full h-64 object-cover"
-                  />
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+              {displayedItems.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => openCardPreview(item)}
+                  className="bg-white border border-[#C9F5DC] rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition cursor-pointer"
+                >
+                  <div className="relative overflow-hidden rounded-xl">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-40 sm:h-48 md:h-64 object-cover rounded-xl"
+                    />
 
-                  <div className="absolute top-4 left-4 z-30 bg-[#065F2F] text-white text-xs font-bold px-3 py-1 rounded-full pointer-events-none">
-                    News
+                    <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-30 bg-[#065F2F] text-white text-[9px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full pointer-events-none">
+                      News
+                    </div>
+
+                    {!!currentUser && item?.id && (
+                      <div
+                        className="absolute top-2 sm:top-4 right-2 sm:right-4 z-40 flex gap-1 sm:gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="bg-white text-[#065F2F] h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition text-xs sm:text-base"
+                          type="button"
+                          title="Edit"
+                        >
+                          <FaEdit />
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(item)}
+                          disabled={deletingId === item.id}
+                          className="bg-white text-red-600 h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition disabled:opacity-60 text-xs sm:text-base"
+                          type="button"
+                          title="Delete"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  {!!currentUser && item?.id && (
-                    <div className="absolute top-4 right-4 z-40 flex gap-2">
-                      <button
-                        onClick={() => handleEdit(item)}
-                        className="bg-white text-[#065F2F] h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition"
-                        type="button"
-                        title="Edit"
-                      >
-                        <FaEdit />
-                      </button>
+                  <div className="p-3 sm:p-4">
+                    <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2">
+                      <p className="text-[9px] sm:text-xs uppercase tracking-widest text-[#F2B705] font-bold line-clamp-1">
+                        News Update
+                      </p>
 
-                      <button
-                        onClick={() => handleDelete(item)}
-                        disabled={deletingId === item.id}
-                        className="bg-white text-red-600 h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition disabled:opacity-60"
-                        type="button"
-                        title="Delete"
-                      >
-                        <FaTrash />
-                      </button>
+                      {currentUser && (
+                        <span
+                          className={`hidden sm:inline-block text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
+                            item.status === "published"
+                              ? "bg-[#E9FFF3] text-[#065F2F] border border-[#C9F5DC]"
+                              : "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                          }`}
+                        >
+                          {item.status || "published"}
+                        </span>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                <div className="p-5">
-                  {currentUser && (
-                    <span
-                      className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
-                        item.status === "published"
-                          ? "bg-[#E9FFF3] text-[#065F2F] border border-[#C9F5DC]"
-                          : "bg-yellow-50 text-yellow-700 border border-yellow-200"
-                      }`}
+                    <h4 className="font-bold text-sm sm:text-lg text-[#065F2F] line-clamp-2">
+                      {item.title}
+                    </h4>
+
+                    {item.description && (
+                      <p className="hidden sm:block text-sm text-slate-500 mt-2 line-clamp-2">
+                        {item.description}
+                      </p>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedItem(item);
+                      }}
+                      className="mt-2 sm:mt-3 text-[11px] sm:text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
                     >
-                      {item.status || "published"}
-                    </span>
-                  )}
+                      Read More
+                    </button>
 
-                  <h4 className="font-extrabold text-xl text-[#065F2F] mt-3">
-                    {item.title}
-                  </h4>
+                    {item.createdByName && (
+                      <p className="hidden sm:block text-xs text-slate-400 mt-3">
+                        Added by: {item.createdByName}
+                      </p>
+                    )}
 
-                  {item.description && (
-                    <p className="text-sm text-slate-500 mt-2 line-clamp-3">
-                      {item.description}
+                    <p className="hidden sm:block text-xs text-slate-400 mt-1">
+                      Added on: {formatAddedTime(item.createdAt)}
                     </p>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => setExpandedItem(item)}
-                    className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
-                  >
-                    Read More
-                  </button>
-
-                  {item.createdByName && (
-                    <p className="text-xs text-slate-400 mt-3">
-                      Added by: {item.createdByName}
-                    </p>
-                  )}
-
-                  <p className="text-xs text-slate-400 mt-1">
-                    Added on: {formatAddedTime(item.createdAt)}
-                  </p>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            {hasCardsToToggle && (
+              <div className="text-center mt-10">
+                <button
+                  type="button"
+                  onClick={hasMoreCards ? handleViewMore : handleShowLess}
+                  className="bg-[#065F2F] text-white px-8 py-3 rounded-full font-bold hover:bg-[#0B7A3E] transition shadow-lg"
+                >
+                  {hasMoreCards ? "View More" : "Show Less"}
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
+
+      {previewItem && (
+        <div className="fixed inset-0 z-[999] bg-black/75 px-4 py-8 flex items-center justify-center">
+          <div className="bg-white w-full max-w-5xl max-h-[92vh] overflow-y-auto rounded-3xl shadow-2xl border border-[#C9F5DC]">
+            <div className="sticky top-0 bg-white border-b border-[#C9F5DC] p-5 flex items-start justify-between gap-4 rounded-t-3xl z-10">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-[#F2B705] mb-2">
+                  News Update
+                </p>
+                <h3 className="text-2xl md:text-4xl font-extrabold text-[#065F2F]">
+                  {previewItem.title}
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setPreviewItem(null)}
+                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="p-5 md:p-8">
+              {previewItem.imageUrl && (
+                <img
+                  src={previewItem.imageUrl}
+                  alt={previewItem.title}
+                  className="w-full max-h-[65vh] object-cover rounded-2xl"
+                />
+              )}
+
+              {previewItem.description && (
+                <p className="text-slate-700 text-base md:text-lg leading-8 whitespace-pre-line mt-6">
+                  {previewItem.description}
+                </p>
+              )}
+
+              <div className="mt-6 pt-5 border-t border-[#C9F5DC] text-xs text-slate-400 space-y-1">
+                {previewItem.createdByName && (
+                  <p>Added by: {previewItem.createdByName}</p>
+                )}
+                <p>Added on: {formatAddedTime(previewItem.createdAt)}</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPreviewItem(null);
+                  setExpandedItem(previewItem);
+                }}
+                className="mt-6 bg-[#065F2F] text-white px-6 py-3 rounded-full font-bold hover:bg-[#0B7A3E] transition shadow-lg"
+              >
+                Read Full News
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {expandedItem && (
         <div className="fixed inset-0 z-[999] bg-black/70 px-4 py-8 flex items-center justify-center">

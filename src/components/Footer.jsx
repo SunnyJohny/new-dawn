@@ -3,7 +3,7 @@ import {
   FaYoutube,
   FaWhatsapp,
   FaFacebook,
-  FaLinkedin,
+  // FaLinkedin,
   FaTiktok,
 } from "react-icons/fa";
 
@@ -23,11 +23,11 @@ const socialMediaLinks = [
     icon: <FaFacebook />,
     url: "#",
   },
-  {
-    name: "LinkedIn",
-    icon: <FaLinkedin />,
-    url: "#",
-  },
+  // {
+  //   name: "LinkedIn",
+  //   icon: <FaLinkedin />,
+  //   url: "#",
+  // },
   {
     name: "TikTok",
     icon: <FaTiktok />,
