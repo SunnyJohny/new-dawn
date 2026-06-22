@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaPlus,
   FaPlayCircle,
@@ -19,6 +19,8 @@ const archiveTabs = [
   { label: "Platforms", value: "platforms" },
 ];
 
+const filterTabs = [{ label: "All", value: "all" }, ...archiveTabs];
+
 const initialFormData = {
   title: "",
   description: "",
@@ -38,11 +40,11 @@ const Archives = () => {
     addArchive,
     updateArchive,
     deleteArchive,
-    selectedArchiveCategory = "records",
+    selectedArchiveCategory = "all",
     setSelectedArchiveCategory,
   } = useMyContext();
 
-  const activeCategory = selectedArchiveCategory || "records";
+  const activeCategory = selectedArchiveCategory || "all";
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -51,17 +53,30 @@ const Archives = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [expandedItem, setExpandedItem] = useState(null);
   const [playingVideo, setPlayingVideo] = useState(null);
+  const [showAllCards, setShowAllCards] = useState(false);
 
   const [mediaFile, setMediaFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [formData, setFormData] = useState(initialFormData);
 
+  useEffect(() => {
+    if (setSelectedArchiveCategory) {
+      setSelectedArchiveCategory("all");
+    }
+  }, [setSelectedArchiveCategory]);
+
   const signedInItems = archives.length > 0 ? archives : publishedArchives;
   const visibleItems = currentUser ? signedInItems : publishedArchives;
 
-  const filteredItems = visibleItems.filter(
-    (item) => (item.category || "records") === activeCategory
-  );
+  const filteredItems =
+    activeCategory === "all"
+      ? visibleItems
+      : visibleItems.filter(
+          (item) => (item.category || "records") === activeCategory
+        );
+
+  const displayedItems = showAllCards ? filteredItems : filteredItems.slice(0, 6);
+  const hasMoreCards = filteredItems.length > 6 && !showAllCards;
 
   const isTextArchive = formData.mediaType === "text";
 
@@ -87,6 +102,8 @@ const Archives = () => {
   };
 
   const getCategoryTitle = (category) => {
+    if (category === "all") return "All Archives";
+
     return archiveTabs.find((tab) => tab.value === category)?.label || category;
   };
 
@@ -104,6 +121,8 @@ const Archives = () => {
   };
 
   const handleVisibleCategoryChange = (value) => {
+    setShowAllCards(false);
+
     if (setSelectedArchiveCategory) {
       setSelectedArchiveCategory(value);
     }
@@ -429,7 +448,7 @@ const Archives = () => {
         );
       }
 
-      handleVisibleCategoryChange(formData.category);
+      handleVisibleCategoryChange("all");
       resetForm();
       setShowAddForm(false);
     } catch (error) {
@@ -788,7 +807,7 @@ const Archives = () => {
             onChange={(e) => handleVisibleCategoryChange(e.target.value)}
             className="w-full bg-white border border-[#C9F5DC] text-[#065F2F] font-bold rounded-2xl px-5 py-4 shadow-md focus:outline-none focus:ring-2 focus:ring-[#0B7A3E] cursor-pointer"
           >
-            {archiveTabs.map((tab) => (
+            {filterTabs.map((tab) => (
               <option key={tab.value} value={tab.value}>
                 {tab.label}
               </option>
@@ -816,124 +835,138 @@ const Archives = () => {
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white border border-[#C9F5DC] rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition"
-              >
-                <div className="relative overflow-hidden rounded-xl">
-                  {renderMedia(item)}
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white border border-[#C9F5DC] rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition"
+                >
+                  <div className="relative overflow-hidden rounded-xl">
+                    {renderMedia(item)}
 
-                  <div className="absolute top-4 left-4 z-30 bg-[#065F2F] text-white text-xs font-bold px-3 py-1 rounded-full pointer-events-none">
-                    {item.mediaType === "text" ? (
-                      <span className="inline-flex items-center gap-1">
-                        <FaFileAlt /> Text
-                      </span>
-                    ) : item.mediaType === "photo" ? (
-                      <span className="inline-flex items-center gap-1">
-                        <FaImage /> Photo
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1">
-                        <FaPlayCircle /> Video
-                      </span>
-                    )}
-                  </div>
-
-                  {!!currentUser && item?.id && (
-                    <div className="absolute top-4 right-4 z-40 flex gap-2">
-                      <button
-                        onClick={() => handleEdit(item)}
-                        className="bg-white text-[#065F2F] h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition"
-                        type="button"
-                        title="Edit"
-                      >
-                        <FaEdit />
-                      </button>
-
-                      <button
-                        onClick={() => handleDelete(item)}
-                        disabled={deletingId === item.id}
-                        className="bg-white text-red-600 h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition disabled:opacity-60"
-                        type="button"
-                        title="Delete"
-                      >
-                        <FaTrash />
-                      </button>
+                    <div className="absolute top-4 left-4 z-30 bg-[#065F2F] text-white text-xs font-bold px-3 py-1 rounded-full pointer-events-none">
+                      {item.mediaType === "text" ? (
+                        <span className="inline-flex items-center gap-1">
+                          <FaFileAlt /> Text
+                        </span>
+                      ) : item.mediaType === "photo" ? (
+                        <span className="inline-flex items-center gap-1">
+                          <FaImage /> Photo
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1">
+                          <FaPlayCircle /> Video
+                        </span>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <p className="text-xs uppercase tracking-widest text-[#F2B705] font-bold">
-                      {getCategoryTitle(item.category)}
-                    </p>
+                    {!!currentUser && item?.id && (
+                      <div className="absolute top-4 right-4 z-40 flex gap-2">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="bg-white text-[#065F2F] h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition"
+                          type="button"
+                          title="Edit"
+                        >
+                          <FaEdit />
+                        </button>
 
-                    {currentUser && (
-                      <span
-                        className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
-                          item.status === "published"
-                            ? "bg-[#E9FFF3] text-[#065F2F] border border-[#C9F5DC]"
-                            : "bg-yellow-50 text-yellow-700 border border-yellow-200"
-                        }`}
-                      >
-                        {item.status || "published"}
-                      </span>
+                        <button
+                          onClick={() => handleDelete(item)}
+                          disabled={deletingId === item.id}
+                          className="bg-white text-red-600 h-9 w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition disabled:opacity-60"
+                          type="button"
+                          title="Delete"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     )}
                   </div>
 
-                  <h4 className="font-bold text-lg text-[#065F2F]">
-                    {item.title}
-                  </h4>
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <p className="text-xs uppercase tracking-widest text-[#F2B705] font-bold">
+                        {getCategoryTitle(item.category)}
+                      </p>
 
-                  {item.description && item.mediaType !== "text" && (
-                    <p className="text-sm text-slate-500 mt-2">
-                      {item.description}
-                    </p>
-                  )}
+                      {currentUser && (
+                        <span
+                          className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
+                            item.status === "published"
+                              ? "bg-[#E9FFF3] text-[#065F2F] border border-[#C9F5DC]"
+                              : "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                          }`}
+                        >
+                          {item.status || "published"}
+                        </span>
+                      )}
+                    </div>
 
-                  {item.mediaType === "text" && (
-                    <button
-                      type="button"
-                      onClick={() => setExpandedItem(item)}
-                      className="mt-3 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
-                    >
-                      Read full archive
-                    </button>
-                  )}
+                    <h4 className="font-bold text-lg text-[#065F2F]">
+                      {item.title}
+                    </h4>
 
-                  {item.mediaType === "video" && (
-                    <button
-                      type="button"
-                      onClick={() => setPlayingVideo(item)}
-                      className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
-                    >
-                      <FaPlayCircle />
-                      Play video
-                    </button>
-                  )}
+                    {item.description && item.mediaType !== "text" && (
+                      <p className="text-sm text-slate-500 mt-2">
+                        {item.description}
+                      </p>
+                    )}
 
-                  {item.source && (
-                    <p className="text-xs text-slate-400 mt-3">
-                      Source: {item.source}
-                    </p>
-                  )}
+                    {item.mediaType === "text" && (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedItem(item)}
+                        className="mt-3 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
+                      >
+                        Read full archive
+                      </button>
+                    )}
 
-                  {item.createdByName && (
+                    {item.mediaType === "video" && (
+                      <button
+                        type="button"
+                        onClick={() => setPlayingVideo(item)}
+                        className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
+                      >
+                        <FaPlayCircle />
+                        Play video
+                      </button>
+                    )}
+
+                    {item.source && (
+                      <p className="text-xs text-slate-400 mt-3">
+                        Source: {item.source}
+                      </p>
+                    )}
+
+                    {item.createdByName && (
+                      <p className="text-xs text-slate-400 mt-1">
+                        Added by: {item.createdByName}
+                      </p>
+                    )}
+
                     <p className="text-xs text-slate-400 mt-1">
-                      Added by: {item.createdByName}
+                      Added on: {formatAddedTime(item.createdAt)}
                     </p>
-                  )}
-
-                  <p className="text-xs text-slate-400 mt-1">
-                    Added on: {formatAddedTime(item.createdAt)}
-                  </p>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            {hasMoreCards && (
+              <div className="text-center mt-10">
+                <button
+                  type="button"
+                  onClick={() => setShowAllCards(true)}
+                  className="bg-[#065F2F] text-white px-8 py-3 rounded-full font-bold hover:bg-[#0B7A3E] transition shadow-lg"
+                >
+                  View More
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
 
