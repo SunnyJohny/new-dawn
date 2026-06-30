@@ -70,6 +70,8 @@ export const MyContextProvider = ({ children }) => {
     doc(db, "newDawn", NEW_DAWN_ID, collectionName, docId);
 
   useEffect(() => {
+    if (!currentUser) return;
+
     const createMainNewDawnDocument = async () => {
       try {
         await setDoc(
@@ -92,7 +94,7 @@ export const MyContextProvider = ({ children }) => {
     };
 
     createMainNewDawnDocument();
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(newDawnDocRef, (snapshot) => {
