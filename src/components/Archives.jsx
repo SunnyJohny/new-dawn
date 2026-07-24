@@ -8,6 +8,14 @@ import {
   FaTrash,
   FaTimes,
   FaFileAlt,
+  FaShareAlt,
+  FaWhatsapp,
+  FaFacebookF,
+  FaTwitter,
+  FaLinkedinIn,
+  FaTelegramPlane,
+  FaEnvelope,
+  FaLink,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useMyContext } from "../Context/MyContext";
@@ -56,6 +64,8 @@ const Archives = () => {
   const [expandedItem, setExpandedItem] = useState(null);
   const [previewItem, setPreviewItem] = useState(null);
   const [playingVideo, setPlayingVideo] = useState(null);
+  const [shareItem, setShareItem] = useState(null);
+  const [shareBusy, setShareBusy] = useState(false);
   const [cardsPerRow, setCardsPerRow] = useState(3);
   const [visibleCount, setVisibleCount] = useState(3);
 
@@ -507,6 +517,257 @@ const Archives = () => {
   const openCardPreview = (item) => {
     setPreviewItem(item);
   };
+
+
+  const getArchiveShareUrl = (item) => {
+    if (typeof window === "undefined") return "";
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("archive", String(item?.id || ""));
+    url.hash = "archives";
+
+    return url.toString();
+  };
+
+  const getArchiveShareImage = (item) => {
+    if (!item) return "";
+
+    if (item.mediaType === "photo") {
+      return item.mediaUrl || item.thumbnailUrl || "";
+    }
+
+    if (item.mediaType === "video") {
+      return (
+        item.thumbnailUrl ||
+        getCloudinaryVideoThumbnail(item.mediaUrl) ||
+        ""
+      );
+    }
+
+    return "";
+  };
+
+  const getArchiveShareText = (item) => {
+    const title = item?.title || "Archive update";
+    const description = String(item?.description || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const shortDescription =
+      description.length > 170
+        ? `${description.slice(0, 167).trim()}...`
+        : description;
+
+    return [title, shortDescription].filter(Boolean).join("\n\n");
+  };
+
+  const openShareOptions = (item, event) => {
+    event?.stopPropagation?.();
+    setShareItem(item);
+  };
+
+  const closeShareOptions = () => {
+    if (shareBusy) return;
+    setShareItem(null);
+  };
+
+  const copyArchiveLink = async (item) => {
+    const url = getArchiveShareUrl(item);
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Archive link copied.");
+    } catch (error) {
+      console.error("Copy archive link failed:", error);
+
+      const temporaryInput = document.createElement("textarea");
+      temporaryInput.value = url;
+      temporaryInput.style.position = "fixed";
+      temporaryInput.style.opacity = "0";
+      document.body.appendChild(temporaryInput);
+      temporaryInput.focus();
+      temporaryInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(temporaryInput);
+
+      toast.success("Archive link copied.");
+    }
+  };
+
+  const openExternalShare = (platform, item) => {
+    const url = getArchiveShareUrl(item);
+    const text = getArchiveShareText(item);
+    const encodedUrl = encodeURIComponent(url);
+    const encodedText = encodeURIComponent(text);
+    const encodedTitle = encodeURIComponent(
+      item?.title || "Archive update"
+    );
+
+    const shareUrls = {
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(
+        `${text}\n\n${url}`
+      )}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
+      email: `mailto:?subject=${encodedTitle}&body=${encodeURIComponent(
+        `${text}\n\n${url}`
+      )}`,
+    };
+
+    const targetUrl = shareUrls[platform];
+
+    if (!targetUrl) return;
+
+    if (platform === "email") {
+      window.location.href = targetUrl;
+      return;
+    }
+
+    window.open(
+      targetUrl,
+      "_blank",
+      "noopener,noreferrer,width=720,height=640"
+    );
+  };
+
+  const fetchShareFile = async (item) => {
+    const imageUrl = getArchiveShareImage(item);
+
+    if (!imageUrl) return null;
+
+    try {
+      const response = await fetch(imageUrl, { mode: "cors" });
+
+      if (!response.ok) {
+        throw new Error("Unable to download archive image.");
+      }
+
+      const blob = await response.blob();
+
+      if (!blob.type.startsWith("image/")) return null;
+
+      const extension =
+        blob.type.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+
+      return new File(
+        [blob],
+        `archive-${item?.id || Date.now()}.${extension}`,
+        { type: blob.type }
+      );
+    } catch (error) {
+      console.warn("Archive image could not be attached:", error);
+      return null;
+    }
+  };
+
+  const nativeShareArchive = async (item) => {
+    if (!navigator.share) {
+      toast.info("Native sharing is not supported here. Choose a platform below.");
+      setShareItem(item);
+      return;
+    }
+
+    try {
+      setShareBusy(true);
+
+      const title = item?.title || "Archive update";
+      const text = getArchiveShareText(item);
+      const url = getArchiveShareUrl(item);
+      const imageFile = await fetchShareFile(item);
+
+      if (
+        imageFile &&
+        navigator.canShare &&
+        navigator.canShare({ files: [imageFile] })
+      ) {
+        await navigator.share({
+          title,
+          text,
+          url,
+          files: [imageFile],
+        });
+      } else {
+        await navigator.share({
+          title,
+          text,
+          url,
+        });
+      }
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        console.error("Native archive share failed:", error);
+        toast.error("Unable to share. Please choose a social platform.");
+        setShareItem(item);
+      }
+    } finally {
+      setShareBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined" || filteredItems.length === 0) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const requestedArchiveId = params.get("archive");
+
+    if (!requestedArchiveId) return;
+
+    const requestedItem = visibleItems.find(
+      (item) => String(item?.id || "") === requestedArchiveId
+    );
+
+    if (!requestedItem) return;
+
+    if (
+      requestedItem.status !== "published" &&
+      !currentUser
+    ) {
+      return;
+    }
+
+    if (
+      activeCategory !== "all" &&
+      requestedItem.category !== activeCategory &&
+      setSelectedArchiveCategory
+    ) {
+      setSelectedArchiveCategory("all");
+    }
+
+    const requestedIndex = visibleItems.findIndex(
+      (item) => String(item?.id || "") === requestedArchiveId
+    );
+
+    if (requestedIndex >= visibleCount) {
+      setVisibleCount(requestedIndex + 1);
+    }
+
+    const timer = window.setTimeout(() => {
+      const section = document.getElementById("archives");
+
+      if (section) {
+        const offset = 120;
+        const top =
+          section.getBoundingClientRect().top +
+          window.scrollY -
+          offset;
+
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+
+      setPreviewItem(requestedItem);
+    }, 250);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    activeCategory,
+    currentUser,
+    filteredItems.length,
+    setSelectedArchiveCategory,
+    visibleCount,
+    visibleItems,
+  ]);
 
   const renderMedia = (item) => {
     if (item.mediaType === "text") {
@@ -971,6 +1232,20 @@ const Archives = () => {
                       )}
                     </div>
 
+                    <button
+                      type="button"
+                      onClick={(e) => openShareOptions(item, e)}
+                      className={`absolute top-2 sm:top-4 z-40 bg-white text-[#065F2F] h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition text-xs sm:text-base ${
+                        currentUser && item?.id
+                          ? "right-[4.5rem] sm:right-[6.5rem]"
+                          : "right-2 sm:right-4"
+                      }`}
+                      title="Share"
+                      aria-label={`Share ${item.title || "archive item"}`}
+                    >
+                      <FaShareAlt />
+                    </button>
+
                     {!!currentUser && item?.id && (
                       <div
                         className="absolute top-2 sm:top-4 right-2 sm:right-4 z-40 flex gap-1 sm:gap-2"
@@ -1026,6 +1301,17 @@ const Archives = () => {
                         {item.description}
                       </p>
                     )}
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openCardPreview(item);
+                      }}
+                      className="mt-2 sm:mt-3 text-[11px] sm:text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
+                    >
+                      Read More
+                    </button>
 
                     {item.mediaType === "text" && (
                       <button
@@ -1102,13 +1388,25 @@ const Archives = () => {
                 </h3>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setPreviewItem(null)}
-                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
-              >
-                <FaTimes />
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => openShareOptions(previewItem)}
+                  className="h-10 w-10 rounded-full bg-[#E9FFF3] text-[#065F2F] flex items-center justify-center hover:bg-[#065F2F] hover:text-white transition"
+                  title="Share archive"
+                  aria-label="Share archive"
+                >
+                  <FaShareAlt />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPreviewItem(null)}
+                  className="h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             <div className="p-5 md:p-8">
@@ -1172,14 +1470,26 @@ const Archives = () => {
                 </h3>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setPlayingVideo(null)}
-                className="shrink-0 h-11 w-11 rounded-full bg-white text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
-                title="Close video"
-              >
-                <FaTimes />
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => openShareOptions(playingVideo)}
+                  className="h-11 w-11 rounded-full bg-white text-[#065F2F] flex items-center justify-center hover:bg-[#065F2F] hover:text-white transition"
+                  title="Share archive video"
+                  aria-label="Share archive video"
+                >
+                  <FaShareAlt />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPlayingVideo(null)}
+                  className="h-11 w-11 rounded-full bg-white text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                  title="Close video"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             <div className="bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10">
@@ -1226,13 +1536,25 @@ const Archives = () => {
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={() => setExpandedItem(null)}
-                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
-              >
-                <FaTimes />
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => openShareOptions(expandedItem)}
+                  className="h-10 w-10 rounded-full bg-[#E9FFF3] text-[#065F2F] flex items-center justify-center hover:bg-[#065F2F] hover:text-white transition"
+                  title="Share archive"
+                  aria-label="Share archive"
+                >
+                  <FaShareAlt />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setExpandedItem(null)}
+                  className="h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             <div className="p-5 md:p-8">
@@ -1247,6 +1569,147 @@ const Archives = () => {
           </div>
         </div>
       )}
+
+      {shareItem && (
+        <div
+          className="fixed inset-0 z-[1200] bg-black/70 px-4 py-8 flex items-center justify-center"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) closeShareOptions();
+          }}
+        >
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-[#C9F5DC] overflow-hidden">
+            <div className="p-5 border-b border-[#C9F5DC] flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-[#F2B705]">
+                  Share Archive
+                </p>
+
+                <h3 className="mt-2 text-xl font-extrabold text-[#065F2F] line-clamp-2">
+                  {shareItem.title || "Archive update"}
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeShareOptions}
+                disabled={shareBusy}
+                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition disabled:opacity-60"
+                aria-label="Close sharing options"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            {getArchiveShareImage(shareItem) && (
+              <img
+                src={getArchiveShareImage(shareItem)}
+                alt={shareItem.title || "Archive share preview"}
+                className="w-full h-48 object-cover"
+              />
+            )}
+
+            <div className="p-5">
+              <button
+                type="button"
+                onClick={() => nativeShareArchive(shareItem)}
+                disabled={shareBusy}
+                className="w-full bg-[#065F2F] text-white px-5 py-3 rounded-xl font-bold hover:bg-[#0B7A3E] transition disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              >
+                <FaShareAlt />
+                {shareBusy ? "Preparing Share..." : "Share to Available Apps"}
+              </button>
+
+              <p className="text-xs text-slate-500 mt-3 text-center">
+                On supported mobile devices, the archive picture is attached to the share.
+              </p>
+
+              <div className="grid grid-cols-4 gap-3 mt-5">
+                <button
+                  type="button"
+                  onClick={() => openExternalShare("whatsapp", shareItem)}
+                  className="rounded-2xl border border-[#C9F5DC] p-3 flex flex-col items-center gap-2 hover:bg-[#E9FFF3] transition"
+                  title="Share on WhatsApp"
+                >
+                  <FaWhatsapp className="text-2xl text-green-600" />
+                  <span className="text-[10px] font-bold text-slate-600">WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => openExternalShare("facebook", shareItem)}
+                  className="rounded-2xl border border-[#C9F5DC] p-3 flex flex-col items-center gap-2 hover:bg-[#E9FFF3] transition"
+                  title="Share on Facebook"
+                >
+                  <FaFacebookF className="text-2xl text-blue-600" />
+                  <span className="text-[10px] font-bold text-slate-600">Facebook</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => openExternalShare("twitter", shareItem)}
+                  className="rounded-2xl border border-[#C9F5DC] p-3 flex flex-col items-center gap-2 hover:bg-[#E9FFF3] transition"
+                  title="Share on X"
+                >
+                  <FaTwitter className="text-2xl text-sky-500" />
+                  <span className="text-[10px] font-bold text-slate-600">X</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => openExternalShare("linkedin", shareItem)}
+                  className="rounded-2xl border border-[#C9F5DC] p-3 flex flex-col items-center gap-2 hover:bg-[#E9FFF3] transition"
+                  title="Share on LinkedIn"
+                >
+                  <FaLinkedinIn className="text-2xl text-blue-700" />
+                  <span className="text-[10px] font-bold text-slate-600">LinkedIn</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => openExternalShare("telegram", shareItem)}
+                  className="rounded-2xl border border-[#C9F5DC] p-3 flex flex-col items-center gap-2 hover:bg-[#E9FFF3] transition"
+                  title="Share on Telegram"
+                >
+                  <FaTelegramPlane className="text-2xl text-sky-500" />
+                  <span className="text-[10px] font-bold text-slate-600">Telegram</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => openExternalShare("email", shareItem)}
+                  className="rounded-2xl border border-[#C9F5DC] p-3 flex flex-col items-center gap-2 hover:bg-[#E9FFF3] transition"
+                  title="Share by email"
+                >
+                  <FaEnvelope className="text-2xl text-slate-600" />
+                  <span className="text-[10px] font-bold text-slate-600">Email</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => copyArchiveLink(shareItem)}
+                  className="rounded-2xl border border-[#C9F5DC] p-3 flex flex-col items-center gap-2 hover:bg-[#E9FFF3] transition"
+                  title="Copy archive link"
+                >
+                  <FaLink className="text-2xl text-[#065F2F]" />
+                  <span className="text-[10px] font-bold text-slate-600">Copy Link</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => nativeShareArchive(shareItem)}
+                  disabled={shareBusy}
+                  className="rounded-2xl border border-[#C9F5DC] p-3 flex flex-col items-center gap-2 hover:bg-[#E9FFF3] transition disabled:opacity-60"
+                  title="More sharing options"
+                >
+                  <FaShareAlt className="text-2xl text-[#065F2F]" />
+                  <span className="text-[10px] font-bold text-slate-600">More</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 };

@@ -1,5 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { FaPlus, FaEdit, FaTrash, FaTimes, FaImage } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaTimes,
+  FaImage,
+  FaShareAlt,
+  FaWhatsapp,
+  FaFacebookF,
+  FaTwitter,
+  FaLinkedinIn,
+  FaTelegramPlane,
+  FaEnvelope,
+  FaLink,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useMyContext } from "../Context/MyContext";
 
@@ -33,6 +47,7 @@ const News = () => {
   const [cardsPerRow, setCardsPerRow] = useState(3);
   const [visibleCount, setVisibleCount] = useState(3);
   const [formData, setFormData] = useState(initialFormData);
+  const [shareItem, setShareItem] = useState(null);
 
   useEffect(() => {
     const updateCardsPerRow = () => {
@@ -78,6 +93,148 @@ const News = () => {
       dateStyle: "medium",
       timeStyle: "short",
     });
+  };
+
+  const getShortDescription = (description = "", maxLength = 105) => {
+    const cleanText = String(description).replace(/\s+/g, " ").trim();
+
+    if (cleanText.length <= maxLength) return cleanText;
+
+    return `${cleanText.slice(0, maxLength).trimEnd()}...`;
+  };
+
+  const buildShareUrl = (item) => {
+    if (typeof window === "undefined") return "";
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("news", item?.id || "");
+    url.hash = "news";
+
+    return url.toString();
+  };
+
+  const buildShareText = (item) => {
+    const title = item?.title || "The New Dawn News";
+    const description = getShortDescription(item?.description || "", 150);
+
+    return description ? `${title}\n\n${description}` : title;
+  };
+
+  const openShare = (item, event) => {
+    event?.stopPropagation();
+    setShareItem(item);
+  };
+
+  const closeShare = () => {
+    setShareItem(null);
+  };
+
+  const shareToPlatform = (platform, item) => {
+    const shareUrl = buildShareUrl(item);
+    const title = item?.title || "The New Dawn News";
+    const text = buildShareText(item);
+    const encodedUrl = encodeURIComponent(shareUrl);
+    const encodedTitle = encodeURIComponent(title);
+    const encodedText = encodeURIComponent(text);
+
+    const platformUrls = {
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(`${text}\n\n${shareUrl}`)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
+      email: `mailto:?subject=${encodedTitle}&body=${encodeURIComponent(
+        `${text}\n\n${shareUrl}`
+      )}`,
+    };
+
+    const targetUrl = platformUrls[platform];
+
+    if (!targetUrl) return;
+
+    if (platform === "email") {
+      window.location.href = targetUrl;
+    } else {
+      window.open(targetUrl, "_blank", "noopener,noreferrer,width=760,height=680");
+    }
+  };
+
+  const copyShareLink = async (item) => {
+    const shareUrl = buildShareUrl(item);
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("News link copied.");
+    } catch (error) {
+      console.error("Copy link failed:", error);
+
+      const input = document.createElement("textarea");
+      input.value = shareUrl;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+
+      toast.success("News link copied.");
+    }
+  };
+
+  const shareNatively = async (item) => {
+    const shareUrl = buildShareUrl(item);
+    const shareData = {
+      title: item?.title || "The New Dawn News",
+      text: buildShareText(item),
+      url: shareUrl,
+    };
+
+    try {
+      if (item?.imageUrl) {
+        try {
+          const imageResponse = await fetch(item.imageUrl, { mode: "cors" });
+
+          if (imageResponse.ok) {
+            const imageBlob = await imageResponse.blob();
+            const extension =
+              imageBlob.type?.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+            const imageFile = new File(
+              [imageBlob],
+              `the-new-dawn-news-${item?.id || Date.now()}.${extension}`,
+              { type: imageBlob.type || "image/jpeg" }
+            );
+
+            const shareWithFile = {
+              ...shareData,
+              files: [imageFile],
+            };
+
+            if (
+              navigator.share &&
+              navigator.canShare &&
+              navigator.canShare(shareWithFile)
+            ) {
+              await navigator.share(shareWithFile);
+              closeShare();
+              return;
+            }
+          }
+        } catch (imageError) {
+          console.warn("Image attachment sharing is unavailable:", imageError);
+        }
+      }
+
+      if (navigator.share) {
+        await navigator.share(shareData);
+        closeShare();
+        return;
+      }
+
+      setShareItem(item);
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        console.error("Native share failed:", error);
+        setShareItem(item);
+      }
+    }
   };
 
   const resetForm = () => {
@@ -524,31 +681,43 @@ const News = () => {
                       News
                     </div>
 
-                    {!!currentUser && item?.id && (
-                      <div
-                        className="absolute top-2 sm:top-4 right-2 sm:right-4 z-40 flex gap-1 sm:gap-2"
-                        onClick={(e) => e.stopPropagation()}
+                    <div
+                      className="absolute top-2 sm:top-4 right-2 sm:right-4 z-40 flex gap-1 sm:gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={(e) => openShare(item, e)}
+                        className="bg-white text-[#065F2F] h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#F2B705] hover:text-[#065F2F] transition text-xs sm:text-base"
+                        type="button"
+                        title="Share news"
+                        aria-label={`Share ${item.title || "news"}`}
                       >
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="bg-white text-[#065F2F] h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition text-xs sm:text-base"
-                          type="button"
-                          title="Edit"
-                        >
-                          <FaEdit />
-                        </button>
+                        <FaShareAlt />
+                      </button>
 
-                        <button
-                          onClick={() => handleDelete(item)}
-                          disabled={deletingId === item.id}
-                          className="bg-white text-red-600 h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition disabled:opacity-60 text-xs sm:text-base"
-                          type="button"
-                          title="Delete"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    )}
+                      {!!currentUser && item?.id && (
+                        <>
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="bg-white text-[#065F2F] h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition text-xs sm:text-base"
+                            type="button"
+                            title="Edit"
+                          >
+                            <FaEdit />
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(item)}
+                            disabled={deletingId === item.id}
+                            className="bg-white text-red-600 h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition disabled:opacity-60 text-xs sm:text-base"
+                            type="button"
+                            title="Delete"
+                          >
+                            <FaTrash />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   <div className="p-3 sm:p-4">
@@ -575,8 +744,8 @@ const News = () => {
                     </h4>
 
                     {item.description && (
-                      <p className="hidden sm:block text-sm text-slate-500 mt-2 line-clamp-2">
-                        {item.description}
+                      <p className="text-[11px] sm:text-sm text-slate-500 mt-2 leading-relaxed line-clamp-2">
+                        {getShortDescription(item.description)}
                       </p>
                     )}
 
@@ -633,13 +802,26 @@ const News = () => {
                 </h3>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setPreviewItem(null)}
-                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
-              >
-                <FaTimes />
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => shareNatively(previewItem)}
+                  className="h-10 w-10 rounded-full bg-[#E9FFF3] text-[#065F2F] flex items-center justify-center hover:bg-[#065F2F] hover:text-white transition"
+                  title="Share news"
+                  aria-label="Share news"
+                >
+                  <FaShareAlt />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPreviewItem(null)}
+                  className="h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                  aria-label="Close preview"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             <div className="p-5 md:p-8">
@@ -692,13 +874,26 @@ const News = () => {
                 </h3>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setExpandedItem(null)}
-                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
-              >
-                <FaTimes />
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => shareNatively(expandedItem)}
+                  className="h-10 w-10 rounded-full bg-[#E9FFF3] text-[#065F2F] flex items-center justify-center hover:bg-[#065F2F] hover:text-white transition"
+                  title="Share news"
+                  aria-label="Share news"
+                >
+                  <FaShareAlt />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setExpandedItem(null)}
+                  className="h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                  aria-label="Close full news"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             {expandedItem.imageUrl && (
@@ -721,6 +916,153 @@ const News = () => {
           </div>
         </div>
       )}
+
+      {shareItem && (
+        <div
+          className="fixed inset-0 z-[1200] bg-black/70 px-4 py-8 flex items-center justify-center"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeShare();
+          }}
+        >
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-[#C9F5DC] overflow-hidden">
+            <div className="p-5 border-b border-[#C9F5DC] flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-[#F2B705]">
+                  Share News
+                </p>
+                <h3 className="mt-2 text-lg font-extrabold text-[#065F2F] line-clamp-2">
+                  {shareItem.title || "The New Dawn News"}
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeShare}
+                className="shrink-0 h-9 w-9 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                aria-label="Close sharing options"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            {shareItem.imageUrl && (
+              <img
+                src={shareItem.imageUrl}
+                alt={shareItem.title || "The New Dawn news"}
+                className="w-full h-48 object-cover"
+              />
+            )}
+
+            <div className="p-5">
+              <p className="text-sm text-slate-600">
+                Share this news through your preferred platform.
+              </p>
+
+              <div className="mt-5 grid grid-cols-4 gap-3">
+                <button
+                  type="button"
+                  onClick={() => shareToPlatform("whatsapp", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-green-50 transition"
+                  title="Share on WhatsApp"
+                >
+                  <FaWhatsapp className="text-2xl text-green-600" />
+                  <span className="text-[10px] font-bold text-slate-600">
+                    WhatsApp
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => shareToPlatform("facebook", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-blue-50 transition"
+                  title="Share on Facebook"
+                >
+                  <FaFacebookF className="text-2xl text-blue-600" />
+                  <span className="text-[10px] font-bold text-slate-600">
+                    Facebook
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => shareToPlatform("twitter", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-slate-50 transition"
+                  title="Share on X"
+                >
+                  <FaTwitter className="text-2xl text-sky-500" />
+                  <span className="text-[10px] font-bold text-slate-600">X</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => shareToPlatform("linkedin", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-blue-50 transition"
+                  title="Share on LinkedIn"
+                >
+                  <FaLinkedinIn className="text-2xl text-blue-700" />
+                  <span className="text-[10px] font-bold text-slate-600">
+                    LinkedIn
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => shareToPlatform("telegram", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-sky-50 transition"
+                  title="Share on Telegram"
+                >
+                  <FaTelegramPlane className="text-2xl text-sky-500" />
+                  <span className="text-[10px] font-bold text-slate-600">
+                    Telegram
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => shareToPlatform("email", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-amber-50 transition"
+                  title="Share by email"
+                >
+                  <FaEnvelope className="text-2xl text-amber-600" />
+                  <span className="text-[10px] font-bold text-slate-600">
+                    Email
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => copyShareLink(shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-slate-50 transition"
+                  title="Copy link"
+                >
+                  <FaLink className="text-2xl text-slate-600" />
+                  <span className="text-[10px] font-bold text-slate-600">
+                    Copy Link
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => shareNatively(shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-[#E9FFF3] transition"
+                  title="More sharing options"
+                >
+                  <FaShareAlt className="text-2xl text-[#065F2F]" />
+                  <span className="text-[10px] font-bold text-slate-600">
+                    More
+                  </span>
+                </button>
+              </div>
+
+              <p className="mt-4 text-[11px] leading-relaxed text-slate-500">
+                On supported mobile devices, the More option will also try to
+                attach the news picture directly.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 };

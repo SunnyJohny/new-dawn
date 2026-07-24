@@ -8,6 +8,14 @@ import {
   FaTrash,
   FaTimes,
   FaFileAlt,
+  FaShareAlt,
+  FaWhatsapp,
+  FaFacebookF,
+  FaTwitter,
+  FaLinkedinIn,
+  FaTelegramPlane,
+  FaEnvelope,
+  FaLink,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useMyContext } from "../Context/MyContext";
@@ -59,6 +67,7 @@ const Documentary = () => {
   const [expandedItem, setExpandedItem] = useState(null);
   const [previewItem, setPreviewItem] = useState(null);
   const [playingVideo, setPlayingVideo] = useState(null);
+  const [shareItem, setShareItem] = useState(null);
   const [cardsPerRow, setCardsPerRow] = useState(3);
   const [visibleCount, setVisibleCount] = useState(3);
 
@@ -637,6 +646,172 @@ const Documentary = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getShareImage = (item) => {
+    if (!item) return "";
+
+    if (item.mediaType === "photo") {
+      return item.mediaUrl || item.thumbnailUrl || "";
+    }
+
+    if (item.mediaType === "video") {
+      if (item.thumbnailUrl) return item.thumbnailUrl;
+
+      if (isYoutubeVideo(item)) {
+        return getYoutubeThumbnail(item.youtubeUrl || item.mediaUrl);
+      }
+
+      return getCloudinaryVideoThumbnail(item.mediaUrl);
+    }
+
+    return "";
+  };
+
+  const getShareUrl = (item) => {
+    if (typeof window === "undefined") return "";
+
+    const url = new URL(window.location.href);
+
+    url.searchParams.delete("documentary");
+    url.searchParams.set("documentary", item?.id || "");
+    url.hash = "documentary";
+
+    return url.toString();
+  };
+
+  const getShareText = (item) => {
+    const description = String(item?.description || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const shortenedDescription =
+      description.length > 180
+        ? `${description.slice(0, 177).trim()}...`
+        : description;
+
+    return [item?.title || "Documentary & Media", shortenedDescription]
+      .filter(Boolean)
+      .join("\n\n");
+  };
+
+  const openShareWindow = (url) => {
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer,width=720,height=650"
+    );
+  };
+
+  const handlePlatformShare = (platform, item) => {
+    const shareUrl = getShareUrl(item);
+    const shareText = getShareText(item);
+    const encodedUrl = encodeURIComponent(shareUrl);
+    const encodedText = encodeURIComponent(shareText);
+    const encodedTitle = encodeURIComponent(
+      item?.title || "Documentary & Media"
+    );
+
+    const links = {
+      whatsapp: `https://wa.me/?text=${encodedText}%0A%0A${encodedUrl}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
+      email: `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0A${encodedUrl}`,
+    };
+
+    const destination = links[platform];
+
+    if (!destination) return;
+
+    if (platform === "email") {
+      window.location.href = destination;
+      return;
+    }
+
+    openShareWindow(destination);
+  };
+
+  const handleCopyShareLink = async (item) => {
+    const shareUrl = getShareUrl(item);
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied successfully.");
+      setShareItem(null);
+    } catch (error) {
+      console.error("Copy link failed:", error);
+      toast.error("Unable to copy the link.");
+    }
+  };
+
+  const fetchShareFile = async (item) => {
+    const imageUrl = getShareImage(item);
+
+    if (!imageUrl) return null;
+
+    try {
+      const response = await fetch(imageUrl, { mode: "cors" });
+
+      if (!response.ok) return null;
+
+      const blob = await response.blob();
+      const extension =
+        blob.type.includes("png")
+          ? "png"
+          : blob.type.includes("webp")
+          ? "webp"
+          : "jpg";
+
+      return new File(
+        [blob],
+        `documentary-${item?.id || Date.now()}.${extension}`,
+        { type: blob.type || "image/jpeg" }
+      );
+    } catch (error) {
+      console.warn("Unable to prepare media file for sharing:", error);
+      return null;
+    }
+  };
+
+  const handleNativeShare = async (item) => {
+    if (!navigator.share) {
+      setShareItem(item);
+      return;
+    }
+
+    const shareUrl = getShareUrl(item);
+    const shareText = getShareText(item);
+    const shareData = {
+      title: item?.title || "Documentary & Media",
+      text: shareText,
+      url: shareUrl,
+    };
+
+    try {
+      const file = await fetchShareFile(item);
+
+      if (
+        file &&
+        navigator.canShare &&
+        navigator.canShare({ files: [file] })
+      ) {
+        shareData.files = [file];
+      }
+
+      await navigator.share(shareData);
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        console.error("Native share failed:", error);
+        setShareItem(item);
+      }
+    }
+  };
+
+  const openShareMenu = (event, item) => {
+    event?.stopPropagation();
+    setShareItem(item);
   };
 
   const openCardPreview = (item) => {
@@ -1229,6 +1404,20 @@ const Documentary = () => {
                       )}
                     </div>
 
+                    <button
+                      type="button"
+                      onClick={(e) => openShareMenu(e, item)}
+                      className={`absolute top-2 sm:top-4 z-40 bg-white text-[#065F2F] h-7 w-7 sm:h-9 sm:w-9 rounded-full shadow-lg flex items-center justify-center hover:bg-[#0B7A3E] hover:text-white transition text-xs sm:text-base ${
+                        currentUser && item?.id
+                          ? "right-[4.25rem] sm:right-[6.5rem]"
+                          : "right-2 sm:right-4"
+                      }`}
+                      title="Share"
+                      aria-label={`Share ${item.title || "documentary content"}`}
+                    >
+                      <FaShareAlt />
+                    </button>
+
                     {!!currentUser && item?.id && (
                       <div
                         className="absolute top-2 sm:top-4 right-2 sm:right-4 z-40 flex gap-1 sm:gap-2"
@@ -1317,6 +1506,28 @@ const Documentary = () => {
                       </button>
                     )}
 
+                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCardPreview(item);
+                        }}
+                        className="text-[11px] sm:text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
+                      >
+                        {item.mediaType === "text" ? "Read More" : "More"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => openShareMenu(e, item)}
+                        className="inline-flex items-center gap-1.5 text-[11px] sm:text-sm font-bold text-[#065F2F] hover:text-[#0B7A3E]"
+                      >
+                        <FaShareAlt />
+                        Share
+                      </button>
+                    </div>
+
                     {item.source && (
                       <p className="hidden sm:block text-xs text-slate-400 mt-3">
                         Source: {item.source}
@@ -1365,13 +1576,25 @@ const Documentary = () => {
                 </h3>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setPreviewItem(null)}
-                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
-              >
-                <FaTimes />
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => openShareMenu(e, previewItem)}
+                  className="h-10 w-10 rounded-full bg-[#E9FFF3] text-[#065F2F] flex items-center justify-center hover:bg-[#065F2F] hover:text-white transition"
+                  title="Share"
+                  aria-label="Share documentary content"
+                >
+                  <FaShareAlt />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPreviewItem(null)}
+                  className="h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             <div className="p-5 md:p-8">
@@ -1441,14 +1664,26 @@ const Documentary = () => {
                 </h3>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setPlayingVideo(null)}
-                className="shrink-0 h-11 w-11 rounded-full bg-white text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
-                title="Close video"
-              >
-                <FaTimes />
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => openShareMenu(e, playingVideo)}
+                  className="h-11 w-11 rounded-full bg-white text-[#065F2F] flex items-center justify-center hover:bg-[#065F2F] hover:text-white transition"
+                  title="Share video"
+                  aria-label="Share video"
+                >
+                  <FaShareAlt />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPlayingVideo(null)}
+                  className="h-11 w-11 rounded-full bg-white text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                  title="Close video"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             <div className="bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10">
@@ -1477,6 +1712,128 @@ const Documentary = () => {
         </div>
       )}
 
+
+      {shareItem && (
+        <div
+          className="fixed inset-0 z-[1100] bg-black/70 px-4 py-8 flex items-center justify-center"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setShareItem(null);
+          }}
+        >
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-[#C9F5DC] overflow-hidden">
+            <div className="p-5 border-b border-[#C9F5DC] flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-[#F2B705]">
+                  Share
+                </p>
+                <h3 className="mt-2 text-xl font-extrabold text-[#065F2F] line-clamp-2">
+                  {shareItem.title || "Documentary & Media"}
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShareItem(null)}
+                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                aria-label="Close share menu"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            {getShareImage(shareItem) && (
+              <img
+                src={getShareImage(shareItem)}
+                alt={shareItem.title || "Documentary preview"}
+                className="w-full h-44 object-cover"
+              />
+            )}
+
+            <div className="p-5">
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handlePlatformShare("whatsapp", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-green-50 transition"
+                >
+                  <FaWhatsapp className="text-2xl text-green-600" />
+                  <span className="text-xs font-bold text-slate-700">WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handlePlatformShare("facebook", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-blue-50 transition"
+                >
+                  <FaFacebookF className="text-2xl text-blue-700" />
+                  <span className="text-xs font-bold text-slate-700">Facebook</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handlePlatformShare("twitter", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-slate-50 transition"
+                >
+                  <FaTwitter className="text-2xl text-sky-500" />
+                  <span className="text-xs font-bold text-slate-700">X</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handlePlatformShare("linkedin", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-blue-50 transition"
+                >
+                  <FaLinkedinIn className="text-2xl text-blue-700" />
+                  <span className="text-xs font-bold text-slate-700">LinkedIn</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handlePlatformShare("telegram", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-sky-50 transition"
+                >
+                  <FaTelegramPlane className="text-2xl text-sky-500" />
+                  <span className="text-xs font-bold text-slate-700">Telegram</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handlePlatformShare("email", shareItem)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 p-3 hover:bg-amber-50 transition"
+                >
+                  <FaEnvelope className="text-2xl text-amber-600" />
+                  <span className="text-xs font-bold text-slate-700">Email</span>
+                </button>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleCopyShareLink(shareItem)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#065F2F] px-4 py-3 text-sm font-bold text-[#065F2F] hover:bg-[#E9FFF3] transition"
+                >
+                  <FaLink />
+                  Copy Link
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleNativeShare(shareItem)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#065F2F] px-4 py-3 text-sm font-bold text-white hover:bg-[#0B7A3E] transition"
+                >
+                  <FaShareAlt />
+                  More
+                </button>
+              </div>
+
+              <p className="mt-4 text-xs text-slate-500 text-center">
+                The More option can include the picture on supported mobile devices.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {expandedItem && (
         <div className="fixed inset-0 z-[999] bg-black/70 px-4 py-8 flex items-center justify-center">
           <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl border border-[#C9F5DC]">
@@ -1495,13 +1852,25 @@ const Documentary = () => {
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={() => setExpandedItem(null)}
-                className="shrink-0 h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
-              >
-                <FaTimes />
-              </button>
+              <div className="shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => openShareMenu(e, expandedItem)}
+                  className="h-10 w-10 rounded-full bg-[#E9FFF3] text-[#065F2F] flex items-center justify-center hover:bg-[#065F2F] hover:text-white transition"
+                  title="Share"
+                  aria-label="Share broadcast"
+                >
+                  <FaShareAlt />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setExpandedItem(null)}
+                  className="h-10 w-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                >
+                  <FaTimes />
+                </button>
+              </div>
             </div>
 
             <div className="p-5 md:p-8">
